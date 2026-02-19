@@ -14,21 +14,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <ziti/ziti.h>
-#include <ziti/ziti_src.h>
+#include <zt/zt.h>
+#include <zt/zt_src.h>
 #include <tlsuv/tlsuv.h>
 #include <tlsuv/http.h>
 #include <string.h>
 
 static uv_loop_t *loop;
-static ziti_context ziti;
+static zt_context zt;
 static tlsuv_http_t clt;
 static tlsuv_src_t zs;
 
 #define DIE(v) do { \
 int code = (v);\
 if (code != ZITI_OK) {\
-fprintf(stderr, "ERROR: " #v " => %s\n", ziti_errorstr(code));\
+fprintf(stderr, "ERROR: " #v " => %s\n", zt_errorstr(code));\
 exit(code);\
 }} while(0)
 
@@ -48,7 +48,7 @@ void resp_cb(tlsuv_http_resp_t *resp, void *data) {
 void body_cb(tlsuv_http_req_t *req, char *body, ssize_t len) {
     if (len == UV_EOF) {
         printf("\n\n====================\nRequest completed\n");
-        ziti_shutdown(ziti);
+        zt_shutdown(zt);
     } else if (len < 0) {
         fprintf(stderr, "error(%zd) %s", len, uv_strerror(len));
         exit(-1);
@@ -57,12 +57,12 @@ void body_cb(tlsuv_http_req_t *req, char *body, ssize_t len) {
     }
 }
 
-void on_ziti_init(ziti_context ztx, const ziti_event_t *ev) {
+void on_zt_init(zt_context ztx, const zt_event_t *ev) {
 
     DIE(ev->ctx.ctrl_status);
 
-    ziti = ztx;
-    ziti_src_init(loop, &zs, "httpbin", ziti);
+    zt = ztx;
+    zt_src_init(loop, &zs, "httpbin", zt);
     tlsuv_http_init_with_src(loop, &clt, "http://httpbin.org", (tlsuv_src_t *) &zs);
 
     tlsuv_http_req_t *r = tlsuv_http_req(&clt, "GET", "/json", resp_cb, NULL);
@@ -77,17 +77,17 @@ int main(int argc, char** argv) {
 
     loop = uv_default_loop();
 
-    ziti_config cfg;
-    ziti_context ztx;
-    DIE(ziti_load_config(&cfg, argv[1]));
-    DIE(ziti_context_init(&ztx, &cfg));
-    DIE(ziti_context_set_options(ztx, &(ziti_options){
-            .event_cb = on_ziti_init,
+    zt_config cfg;
+    zt_context ztx;
+    DIE(zt_load_config(&cfg, argv[1]));
+    DIE(zt_context_init(&ztx, &cfg));
+    DIE(zt_context_set_options(ztx, &(zt_options){
+            .event_cb = on_zt_init,
             .events = ZitiContextEvent,
     }));
-    DIE(ziti_context_run(ztx, loop));
+    DIE(zt_context_run(ztx, loop));
 
-    // loop will finish after the request is complete and ziti_shutdown is called
+    // loop will finish after the request is complete and zt_shutdown is called
     uv_run(loop, UV_RUN_DEFAULT);
 
     printf("========================\n");

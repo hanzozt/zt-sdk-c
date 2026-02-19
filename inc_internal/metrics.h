@@ -17,7 +17,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <ziti/enums.h>
+#include <zt/enums.h>
 
 #ifdef __cplusplus
 #include <atomic>

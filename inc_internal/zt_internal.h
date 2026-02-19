@@ -20,7 +20,7 @@
 #include <tlsuv/tlsuv.h>
 #include <tlsuv/queue.h>
 
-#include <ziti/ziti.h>
+#include <zt/zt.h>
 
 #include "auth_method.h"
 #include "buffer.h"
@@ -30,7 +30,7 @@
 #include "posture.h"
 #include "stickiness.h"
 #include "utils.h"
-#include "ziti_ctrl.h"
+#include "zt_ctrl.h"
 
 #include <sodium.h>
 
@@ -59,19 +59,19 @@ extern const char *APP_VERSION;
 typedef struct message_s message;
 typedef struct hdr_s hdr_t;
 
-typedef struct ziti_channel ziti_channel_t;
+typedef struct zt_channel zt_channel_t;
 
 typedef void (*reply_cb)(void *ctx, message *m, int err);
 
 typedef void (*ch_notify_state)(
-        ziti_channel_t *ch, ziti_router_status status, int err, void *ctx);
+        zt_channel_t *ch, zt_router_status status, int err, void *ctx);
 
 typedef int ch_state;
 typedef int conn_state;
 
-struct ziti_channel {
+struct zt_channel {
     uv_loop_t *loop;
-    struct ziti_ctx *ztx;
+    struct zt_ctx *ztx;
     char *name;
     char *url;
     char *version;
@@ -118,21 +118,21 @@ struct ziti_channel {
     void *notify_ctx;
 };
 
-struct ziti_write_req_s {
-    struct ziti_conn *conn;
-    struct ziti_channel *ch;
+struct zt_write_req_s {
+    struct zt_conn *conn;
+    struct zt_channel *ch;
     const uint8_t *buf;
     size_t len;
     bool eof;
     bool close;
 
     struct message_s *message;
-    ziti_write_cb cb;
+    zt_write_cb cb;
     uint64_t start_ts;
 
     void *ctx;
 
-    TAILQ_ENTRY(ziti_write_req_s) _next;
+    TAILQ_ENTRY(zt_write_req_s) _next;
     model_list chain;
     size_t chain_len;
 };
@@ -153,24 +153,24 @@ int init_crypto(struct key_exchange *key_ex, struct key_pair *kp, const uint8_t 
 
 void free_key_exchange(struct key_exchange *key_ex);
 
-enum ziti_conn_type {
+enum zt_conn_type {
     None,
     Transport,
     Server,
 };
 
-struct ziti_conn {
-    struct ziti_ctx *ziti_ctx;
-    enum ziti_conn_type type;
+struct zt_conn {
+    struct zt_ctx *zt_ctx;
+    enum zt_conn_type type;
     char *service;
     char *source_identity;
     uint32_t conn_id;
     uint32_t rt_conn_id;
     void *data;
 
-    int (*disposer)(struct ziti_conn *self);
+    int (*disposer)(struct zt_conn *self);
 
-    ziti_close_cb close_cb;
+    zt_close_cb close_cb;
     bool close;
     bool encrypted;
 
@@ -181,13 +181,13 @@ struct ziti_conn {
             uint8_t precedence;
             int max_bindings;
 
-            ziti_listen_cb listen_cb;
-            ziti_client_cb client_cb;
+            zt_listen_cb listen_cb;
+            zt_client_cb client_cb;
 
             bool srv_routers_api_missing;
             model_list routers;
             char *token;
-            ziti_session *session;
+            zt_session *session;
             model_map bindings;
             model_map children;
             deadline_t rebinder;
@@ -197,7 +197,7 @@ struct ziti_conn {
 
         struct {
             struct key_pair key_pair;
-            struct ziti_conn_req *conn_req;
+            struct zt_conn_req *conn_req;
 
             char marker[MARKER_CHAR_LEN];
 
@@ -205,8 +205,8 @@ struct ziti_conn {
             uint32_t in_msg_seq;
             uint32_t flags;
 
-            ziti_channel_t *channel;
-            ziti_data_cb data_cb;
+            zt_channel_t *channel;
+            zt_data_cb data_cb;
             conn_state state;
             bool fin_sent;
             int fin_recv; // 0 - not received, 1 - received, 2 - called app data cb
@@ -215,10 +215,10 @@ struct ziti_conn {
             deadline_t flusher;
             TAILQ_HEAD(, message_s) in_q;
             buffer *inbound;
-            TAILQ_HEAD(, ziti_write_req_s) wreqs;
-            TAILQ_HEAD(, ziti_write_req_s) pending_wreqs;
+            TAILQ_HEAD(, zt_write_req_s) wreqs;
+            TAILQ_HEAD(, zt_write_req_s) pending_wreqs;
 
-            struct ziti_conn *parent;
+            struct zt_conn *parent;
             uint32_t dial_req_seq;
 
             struct key_exchange key_ex;
@@ -247,7 +247,7 @@ struct process {
     int num_signers;
 };
 
-typedef void (*ztx_work_f)(ziti_context ztx, void *w_ctx);
+typedef void (*ztx_work_f)(zt_context ztx, void *w_ctx);
 
 struct ztx_work_s {
     ztx_work_f w;
@@ -262,10 +262,10 @@ struct tls_credentials {
     tlsuv_certificate_t cert;
 };
 
-struct ziti_ctx {
-    ziti_config config;
-    ziti_options opts;
-    ziti_controller ctrl;
+struct zt_ctx {
+    zt_config config;
+    zt_options opts;
+    zt_controller ctrl;
     uint32_t id;
 
     model_map ctrl_details;
@@ -279,26 +279,26 @@ struct ziti_ctx {
     bool enabled;
     int ctrl_status;
 
-    ziti_auth_method_t *auth_method;
-    ziti_auth_state auth_state;
-    ziti_mfa_cb mfa_cb;
+    zt_auth_method_t *auth_method;
+    zt_auth_state auth_state;
+    zt_mfa_cb mfa_cb;
     void *mfa_ctx;
 
     model_map ext_signers;
     struct ext_oidc_client_s *ext_auth;
-    void (*ext_launch_cb)(ziti_context, const char*, void*);
+    void (*ext_launch_cb)(zt_context, const char*, void*);
     void *ext_launch_ctx;
 
-    // HA access_token(JWT) or legacy ziti_api_session.token
+    // HA access_token(JWT) or legacy zt_api_session.token
     char *session_token;
     timestamp session_expiration;
 
-    ziti_identity_data *identity_data;
+    zt_identity_data *identity_data;
 
     bool services_loaded;
-    // map<name,ziti_service>
+    // map<name,zt_service>
     model_map services;
-    // map<service_id,ziti_session>
+    // map<service_id,zt_session>
     model_map sessions;
 
     sticky_tokens_map sticky_tokens;
@@ -308,9 +308,9 @@ struct ziti_ctx {
 
     char *last_update;
 
-    // map<erUrl,ziti_channel>
+    // map<erUrl,zt_channel>
     model_map channels;
-    // map<id,ziti_conn>
+    // map<id,zt_conn>
     model_map connections;
 
     // map<conn_id,conn_id> -- connections waiting for a suitable channel
@@ -344,100 +344,100 @@ struct ziti_ctx {
 extern "C" {
 #endif
 
-ziti_controller *ztx_get_controller(ziti_context ztx);
+zt_controller *ztx_get_controller(zt_context ztx);
 
-void ziti_invalidate_session(ziti_context ztx, const char *service_id, ziti_session_type type);
+void zt_invalidate_session(zt_context ztx, const char *service_id, zt_session_type type);
 
-void ziti_on_channel_event(ziti_channel_t *ch, ziti_router_status status, int err, ziti_context ztx);
+void zt_on_channel_event(zt_channel_t *ch, zt_router_status status, int err, zt_context ztx);
 
-void ziti_force_api_session_refresh(ziti_context ztx);
+void zt_force_api_session_refresh(zt_context ztx);
 
-const char* ziti_get_api_session_token(ziti_context ztx);
+const char* zt_get_api_session_token(zt_context ztx);
 
-int ziti_close_channels(ziti_context ztx, int err);
+int zt_close_channels(zt_context ztx, int err);
 
-bool ziti_channel_is_connected(ziti_channel_t *ch);
+bool zt_channel_is_connected(zt_channel_t *ch);
 
-uint64_t ziti_channel_latency(ziti_channel_t *ch);
+uint64_t zt_channel_latency(zt_channel_t *ch);
 
-void ziti_channel_set_url(ziti_channel_t *ch, const char *url);
+void zt_channel_set_url(zt_channel_t *ch, const char *url);
 
-int ziti_channel_force_connect(ziti_channel_t *ch);
+int zt_channel_force_connect(zt_channel_t *ch);
 
-int ziti_channel_update_token(ziti_channel_t *ch, const char *token);
+int zt_channel_update_token(zt_channel_t *ch, const char *token);
 
-int ziti_channel_update_posture(ziti_channel_t *ch, const uint8_t *data, size_t len);
+int zt_channel_update_posture(zt_channel_t *ch, const uint8_t *data, size_t len);
 
-int ziti_channel_connect(ziti_context ztx, const ziti_edge_router *er);
+int zt_channel_connect(zt_context ztx, const zt_edge_router *er);
 
-int ziti_channel_prepare(ziti_channel_t *ch);
+int zt_channel_prepare(zt_channel_t *ch);
 
-int ziti_channel_disconnect(ziti_channel_t *ch, int err);
-int ziti_channel_close(ziti_channel_t *ch, int err);
+int zt_channel_disconnect(zt_channel_t *ch, int err);
+int zt_channel_close(zt_channel_t *ch, int err);
 
-void ziti_channel_add_receiver(ziti_channel_t *ch, uint32_t id, void *receiver, void (*receive_f)(void *, message *, int));
+void zt_channel_add_receiver(zt_channel_t *ch, uint32_t id, void *receiver, void (*receive_f)(void *, message *, int));
 
-void ziti_channel_rem_receiver(ziti_channel_t *ch, uint32_t id);
+void zt_channel_rem_receiver(zt_channel_t *ch, uint32_t id);
 
-int ziti_channel_send_message(ziti_channel_t *ch, message *msg, struct ziti_write_req_s *ziti_write);
+int zt_channel_send_message(zt_channel_t *ch, message *msg, struct zt_write_req_s *zt_write);
 
-int ziti_channel_send(ziti_channel_t *ch, uint32_t content, const hdr_t *hdrs, int nhdrs, const uint8_t *body,
+int zt_channel_send(zt_channel_t *ch, uint32_t content, const hdr_t *hdrs, int nhdrs, const uint8_t *body,
                       uint32_t body_len,
-                      struct ziti_write_req_s *ziti_write);
+                      struct zt_write_req_s *zt_write);
 
 struct waiter_s *
-ziti_channel_send_for_reply(ziti_channel_t *ch, uint32_t content, const hdr_t *headers, int nhdrs, const uint8_t *body,
+zt_channel_send_for_reply(zt_channel_t *ch, uint32_t content, const hdr_t *headers, int nhdrs, const uint8_t *body,
                             uint32_t body_len, reply_cb,
                             void *reply_ctx);
 
-void ziti_channel_remove_waiter(ziti_channel_t *ch, struct waiter_s *waiter);
+void zt_channel_remove_waiter(zt_channel_t *ch, struct waiter_s *waiter);
 
-int parse_enrollment_jwt(const char *token, ziti_enrollment_jwt_header *zejh, ziti_enrollment_jwt *zej, char **sig, size_t *sig_len);
+int parse_enrollment_jwt(const char *token, zt_enrollment_jwt_header *zejh, zt_enrollment_jwt *zej, char **sig, size_t *sig_len);
 
-int load_tls(ziti_config *cfg, tls_context **tls, struct tls_credentials *creds);
+int load_tls(zt_config *cfg, tls_context **tls, struct tls_credentials *creds);
 
-int ziti_bind(ziti_connection conn, const char *service, const ziti_listen_opts *listen_opts,
-              ziti_listen_cb listen_cb, ziti_client_cb on_clt_cb);
+int zt_bind(zt_connection conn, const char *service, const zt_listen_opts *listen_opts,
+              zt_listen_cb listen_cb, zt_client_cb on_clt_cb);
 
-void conn_inbound_data_msg(ziti_connection conn, message *msg);
+void conn_inbound_data_msg(zt_connection conn, message *msg);
 
-void on_write_completed(struct ziti_conn *conn, struct ziti_write_req_s *req, int status);
+void on_write_completed(struct zt_conn *conn, struct zt_write_req_s *req, int status);
 
-void update_bindings(struct ziti_conn *conn);
-const char *ziti_conn_state(ziti_connection conn);
+void update_bindings(struct zt_conn *conn);
+const char *zt_conn_state(zt_connection conn);
 
-int establish_crypto(ziti_connection conn, message *msg);
+int establish_crypto(zt_connection conn, message *msg);
 
 
 void hexify(const uint8_t *bin, size_t bin_len, char sep, char **buf);
 
-void ziti_re_auth_with_cb(ziti_context ztx, void(*cb)(ziti_api_session *, const ziti_error *, void *), void *ctx);
+void zt_re_auth_with_cb(zt_context ztx, void(*cb)(zt_api_session *, const zt_error *, void *), void *ctx);
 
-void ziti_queue_work(ziti_context ztx, ztx_work_f w, void *data);
+void zt_queue_work(zt_context ztx, ztx_work_f w, void *data);
 
-void ziti_force_service_update(ziti_context ztx, const char *service_id);
+void zt_force_service_update(zt_context ztx, const char *service_id);
 
-void ziti_services_refresh(ziti_context ztx, bool now);
+void zt_services_refresh(zt_context ztx, bool now);
 
-extern void ziti_send_event(ziti_context ztx, const ziti_event_t *e);
+extern void zt_send_event(zt_context ztx, const zt_event_t *e);
 
-void reject_dial_request(uint32_t conn_id, ziti_channel_t *ch, uint32_t req_id, const char *reason);
+void reject_dial_request(uint32_t conn_id, zt_channel_t *ch, uint32_t req_id, const char *reason);
 
-const ziti_env_info* get_env_info();
+const zt_env_info* get_env_info();
 
-int conn_bridge_info(ziti_connection conn, char *buf, size_t buflen);
+int conn_bridge_info(zt_connection conn, char *buf, size_t buflen);
 
-void process_connect(struct ziti_conn *conn, ziti_session *session);
+void process_connect(struct zt_conn *conn, zt_session *session);
 
-int ztx_init_external_auth(ziti_context ztx, const ziti_jwt_signer *signer);
+int ztx_init_external_auth(zt_context ztx, const zt_jwt_signer *signer);
 
-void ztx_auth_state_cb(void *, ziti_auth_state , const void *);
-ziti_channel_t * ztx_get_channel(ziti_context ztx, const ziti_edge_router *er);
+void ztx_auth_state_cb(void *, zt_auth_state , const void *);
+zt_channel_t * ztx_get_channel(zt_context ztx, const zt_edge_router *er);
 
 #define ztx_set_deadline(ztx, timeout, d, cb, ctx) do_ztx_set_deadline((ztx), (timeout), (d), (cb), (FILE_BASENAME":"#cb), (ctx))
-void do_ztx_set_deadline(ziti_context ztx, uint64_t timeout, deadline_t *d, void (*cb)(void *), const char *cb_name, void *ctx);
+void do_ztx_set_deadline(zt_context ztx, uint64_t timeout, deadline_t *d, void (*cb)(void *), const char *cb_name, void *ctx);
 
-int ch_send_conn_closed(ziti_channel_t *ch, uint32_t conn_id);
+int ch_send_conn_closed(zt_channel_t *ch, uint32_t conn_id);
 
 #ifdef __cplusplus
 }

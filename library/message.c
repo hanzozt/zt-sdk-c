@@ -15,7 +15,7 @@
 #include "message.h"
 #include <stdlib.h>
 #include <string.h>
-#include <ziti/errors.h>
+#include <zt/errors.h>
 
 #include "utils.h"
 #include "endian_internal.h"

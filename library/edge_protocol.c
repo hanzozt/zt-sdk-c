@@ -14,9 +14,9 @@
 
 #include "edge_protocol.h"
 #include <protobuf-c/protobuf-c.h>
-#include <ziti/enums.h>
+#include <zt/enums.h>
 
-const struct ziti_terminator_precedence_s PRECEDENCE = {
+const struct zt_terminator_precedence_s PRECEDENCE = {
     .DEFAULT = ZITI__EDGE_CLIENT__PB__PRECEDENCE_VALUE__Default,
     .REQUIRED = ZITI__EDGE_CLIENT__PB__PRECEDENCE_VALUE__Required,
     .FAILED = ZITI__EDGE_CLIENT__PB__PRECEDENCE_VALUE__Failed,
@@ -24,6 +24,6 @@ const struct ziti_terminator_precedence_s PRECEDENCE = {
 
 const char* content_type_id(enum content_type ct) {
     const ProtobufCEnumValue *val = protobuf_c_enum_descriptor_get_value(
-            &ziti__edge_client__pb__content_type__descriptor, ct);
+            &zt__edge_client__pb__content_type__descriptor, ct);
     return val ? val->name : "<unexpected>";
 }

@@ -1,10 +1,10 @@
 
 
 #include <catch2/catch_all.hpp>
-#include <ziti/ziti.h>
+#include <zt/zt.h>
 #include "oidc.h"
-#include "ziti/ziti_log.h"
-#include "ziti_ctrl.h"
+#include "zt/zt_log.h"
+#include "zt_ctrl.h"
 #include <tlsuv/tlsuv.h>
 
 #include "fixtures.h"
@@ -15,19 +15,19 @@
 TEST_CASE("cltr-network-jwt", "[integ]") {
     auto l = uv_default_loop();
 
-    ziti_config cfg{};
-    ziti_controller ctrl{};
-    REQUIRE(ziti_load_config(&cfg, TEST_CLIENT) == ZITI_OK);
+    zt_config cfg{};
+    zt_controller ctrl{};
+    REQUIRE(zt_load_config(&cfg, TEST_CLIENT) == ZITI_OK);
 
     auto tls = default_tls_context(cfg.id.ca, strlen(cfg.id.ca));
-    ziti_ctrl_init(l, &ctrl, &cfg.controllers, tls);
+    zt_ctrl_init(l, &ctrl, &cfg.controllers, tls);
 
     struct res {
         std::string err;
-        ziti_network_jwt_array arr;
+        zt_network_jwt_array arr;
     } result;
 
-    ziti_ctrl_get_network_jwt(&ctrl, [](ziti_network_jwt_array arr, const ziti_error *err, void *ctx) {
+    zt_ctrl_get_network_jwt(&ctrl, [](zt_network_jwt_array arr, const zt_error *err, void *ctx) {
         auto r = static_cast<res *>(ctx);
         if (err) {
             r->err += err->message;
@@ -44,66 +44,66 @@ TEST_CASE("cltr-network-jwt", "[integ]") {
     CHECK(result.arr[0] != nullptr);
     CHECK_THAT(result.arr[0]->name, Catch::Matchers::Equals("default"));
 
-    ziti_enrollment_jwt_header header{};
-    ziti_enrollment_jwt jwt{};
+    zt_enrollment_jwt_header header{};
+    zt_enrollment_jwt jwt{};
 
     char * sig;
     size_t siglen;
     parse_enrollment_jwt((char*)result.arr[0]->token, &header, &jwt, &sig, &siglen);
 
     CHECK(header.alg == jwt_sig_method_RS256);
-    CHECK(jwt.method == ziti_enrollment_method_network);
+    CHECK(jwt.method == zt_enrollment_method_network);
 
-    free_ziti_enrollment_jwt_header(&header);
-    free_ziti_enrollment_jwt(&jwt);
+    free_zt_enrollment_jwt_header(&header);
+    free_zt_enrollment_jwt(&jwt);
 
-    ziti_ctrl_close(&ctrl);
+    zt_ctrl_close(&ctrl);
     tls->free_ctx(tls);
-    free_ziti_network_jwt_array(&result.arr);
-    free_ziti_config(&cfg);
+    free_zt_network_jwt_array(&result.arr);
+    free_zt_config(&cfg);
     free(sig);
 }
 
 TEST_CASE("ctrl-list-terminators", "[integ]") {
     auto conf = TEST_CLIENT;
-    ziti_config config{};
+    zt_config config{};
     tls_credentials creds{};
     tls_context *tls = nullptr;
-    ziti_controller ctrl{};
+    zt_controller ctrl{};
     uv_loop_t *loop = uv_default_loop();
 
-    REQUIRE(ziti_load_config(&config, conf) == ZITI_OK);
+    REQUIRE(zt_load_config(&config, conf) == ZITI_OK);
     REQUIRE(load_tls(&config, &tls, &creds) == ZITI_OK);
-    REQUIRE(ziti_ctrl_init(loop, &ctrl, &config.controllers, tls) == ZITI_OK);
+    REQUIRE(zt_ctrl_init(loop, &ctrl, &config.controllers, tls) == ZITI_OK);
 
     auto session = ctrl_login(ctrl);
     CHECK(session != nullptr);
 
-    auto service = ctrl_get1(ctrl, ziti_ctrl_get_service, TEST_SERVICE);
-    auto list = ctrl_get1(ctrl, ziti_ctrl_list_terminators, service->id);
+    auto service = ctrl_get1(ctrl, zt_ctrl_get_service, TEST_SERVICE);
+    auto list = ctrl_get1(ctrl, zt_ctrl_list_terminators, service->id);
     CHECK(list != nullptr);
-    free_ziti_terminator_array(&list);
-    free_ziti_service_ptr(service);
-    free_ziti_api_session_ptr(session);
-    ziti_ctrl_close(&ctrl);
+    free_zt_terminator_array(&list);
+    free_zt_service_ptr(service);
+    free_zt_api_session_ptr(session);
+    zt_ctrl_close(&ctrl);
 }
 
 TEST_CASE("ctrl-token-auth", "[integ]") {
     // auto l = uv_default_loop();
     //
-    // ziti_config cfg;
-    // REQUIRE(ziti_load_config(&cfg, TEST_CLIENT) == ZITI_OK);
+    // zt_config cfg;
+    // REQUIRE(zt_load_config(&cfg, TEST_CLIENT) == ZITI_OK);
     //
     // auto ctrlTLS = default_tls_context(cfg.id.ca, strlen(cfg.id.ca));
     //
-    // ziti_controller ctrl = {};
-    // REQUIRE(ziti_ctrl_init(l, &ctrl, cfg.controller_url, ctrlTLS) == ZITI_OK);
+    // zt_controller ctrl = {};
+    // REQUIRE(zt_ctrl_init(l, &ctrl, cfg.controller_url, ctrlTLS) == ZITI_OK);
     //
-    // ziti_version v = {0};
+    // zt_version v = {0};
     // std::string err;
-    // ziti_ctrl_get_version(&ctrl, [](const ziti_version *v, const ziti_error *err, void *ctx){
+    // zt_ctrl_get_version(&ctrl, [](const zt_version *v, const zt_error *err, void *ctx){
     //     std::cout << "in version cb" << std::endl;
-    //     auto out = (ziti_version*)ctx;
+    //     auto out = (zt_version*)ctx;
     //     REQUIRE(v != NULL);
     //     *out = *v;
     //     free(v);
@@ -111,8 +111,8 @@ TEST_CASE("ctrl-token-auth", "[integ]") {
     //
     // uv_run(l, UV_RUN_DEFAULT);
     //
-    // bool HA = ziti_has_capability(&v, ziti_ctrl_caps.HA_CONTROLLER);
-    // bool OIDC = ziti_has_capability(&v, ziti_ctrl_caps.OIDC_AUTH);
+    // bool HA = zt_has_capability(&v, zt_ctrl_caps.HA_CONTROLLER);
+    // bool OIDC = zt_has_capability(&v, zt_ctrl_caps.OIDC_AUTH);
     // if (!(HA && OIDC)) {
     //     SKIP("can not test without HA and OIDC");
     // }
@@ -140,14 +140,14 @@ TEST_CASE("ctrl-token-auth", "[integ]") {
     //
     // REQUIRE(!token.empty());
     //
-    // ziti_service service = {nullptr};
-    // ziti_ctrl_set_token(&ctrl, token.c_str());
-    // ziti_ctrl_get_service(&ctrl, TEST_SERVICE,
-    //                       [](ziti_service *s, const ziti_error *err, void *ctx){
+    // zt_service service = {nullptr};
+    // zt_ctrl_set_token(&ctrl, token.c_str());
+    // zt_ctrl_get_service(&ctrl, TEST_SERVICE,
+    //                       [](zt_service *s, const zt_error *err, void *ctx){
     //                           auto msg = err ? err->message : "";
     //                           INFO(msg);
     //                           REQUIRE(s != nullptr);
-    //                           *(ziti_service*)ctx = *s;
+    //                           *(zt_service*)ctx = *s;
     //                           free(s);
     //                       },
     //                       &service);
@@ -155,7 +155,7 @@ TEST_CASE("ctrl-token-auth", "[integ]") {
     //
     // REQUIRE_THAT(service.name, Catch::Matchers::Equals(TEST_SERVICE));
     // oidc_client_close(&oidc, nullptr);
-    // ziti_ctrl_close(&ctrl);
+    // zt_ctrl_close(&ctrl);
     //
     // uv_run(l, UV_RUN_DEFAULT);
     //
@@ -164,7 +164,7 @@ TEST_CASE("ctrl-token-auth", "[integ]") {
     // oidcTLS->free_ctx(oidcTLS);
     // ctrlTLS->free_ctx(ctrlTLS);
     //
-    // free_ziti_version(&v);
-    // free_ziti_service(&service);
-    // free_ziti_config(&cfg);
+    // free_zt_version(&v);
+    // free_zt_service(&service);
+    // free_zt_config(&cfg);
 }

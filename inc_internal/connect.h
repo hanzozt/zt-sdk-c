@@ -36,9 +36,9 @@ enum conn_state {
     conn_states(state_enum)
 };
 
-void init_transport_conn(struct ziti_conn *conn);
+void init_transport_conn(struct zt_conn *conn);
 
-int ziti_close_server(struct ziti_conn *conn);
+int zt_close_server(struct zt_conn *conn);
 
 #ifdef __cplusplus
 }

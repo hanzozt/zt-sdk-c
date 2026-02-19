@@ -1,10 +1,10 @@
 
-find_program(ZITI_CLI NAMES ziti)
+find_program(ZITI_CLI NAMES zt)
 if (NOT ZITI_CLI)
-    message(WARNING "ziti cli was not found: integration testing is not possible")
+    message(WARNING "zt cli was not found: integration testing is not possible")
     return()
 endif ()
-message(NOTICE "ziti cli: ${ZITI_CLI}")
+message(NOTICE "zt cli: ${ZITI_CLI}")
 
 find_program(EXPECTOR NAMES expect)
 if (NOT EXPECTOR)
@@ -35,9 +35,9 @@ add_executable(integ-tests
 )
 target_include_directories(integ-tests
         PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/include
-        PRIVATE ${ziti-sdk_SOURCE_DIR}/inc_internal)
+        PRIVATE ${zt-sdk_SOURCE_DIR}/inc_internal)
 target_link_libraries(integ-tests
-        PRIVATE ziti
+        PRIVATE zt
         PRIVATE Catch2::Catch2WithMain
 )
 
@@ -75,7 +75,7 @@ add_test(NAME quickstart-bootstrap
 set_tests_properties(quickstart-bootstrap PROPERTIES
         FIXTURES_SETUP QS
         ENVIRONMENT "ZITI_CLI=${ZITI_CLI};ZITI_CONFIG_DIR=${qs_home};QUICKSTART_HOME=${qs_home};ENROLLER=$<TARGET_FILE:sample_enroll>"
-        DEPENDS "sample_enroll;ziti-cli"
+        DEPENDS "sample_enroll;zt-cli"
 )
 
 add_test(NAME quickstart-test

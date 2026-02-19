@@ -85,7 +85,7 @@ TEST_CASE("read_file_stdin", "[util]") {
 
 TEST_CASE("check hostname/domainname") {
 
-    const ziti_env_info *info = get_env_info();
+    const zt_env_info *info = get_env_info();
     REQUIRE(info != nullptr);
     CHECK(info->hostname != nullptr);
     CHECK(info->domain != nullptr);

@@ -27,15 +27,15 @@ extern "C" {
 #include "zt_internal.h"
 #include <utils.h>
 
-typedef struct ziti_mfa_auth_ctx_s ziti_mfa_auth_ctx;
+typedef struct zt_mfa_auth_ctx_s zt_mfa_auth_ctx;
 
 struct auth_queries {
-    ziti_mfa_auth_ctx *outstanding_auth_query_ctx;
+    zt_mfa_auth_ctx *outstanding_auth_query_ctx;
 };
 
-extern void ziti_auth_query_init(struct ziti_ctx *ztx);
-extern void ziti_auth_query_free(struct auth_queries* aq);
-extern void ziti_send_event(ziti_context ztx, const ziti_event_t *e);
+extern void zt_auth_query_init(struct zt_ctx *ztx);
+extern void zt_auth_query_free(struct auth_queries* aq);
+extern void zt_send_event(zt_context ztx, const zt_event_t *e);
 
 #ifdef __cplusplus
 }

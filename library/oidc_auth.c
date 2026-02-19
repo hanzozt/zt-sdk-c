@@ -15,29 +15,29 @@
 #include "auth_method.h"
 #include "oidc.h"
 #include "utils.h"
-#include "ziti/errors.h"
+#include "zt/errors.h"
 #include <assert.h>
 #include <stdlib.h>
 
 #include "buffer.h"
-#include "ziti/ziti_buffer.h"
+#include "zt/zt_buffer.h"
 
 #define HA_AUTH(s) container_of((s), struct ha_auth_s, api)
 #define HA_AUTH_FROM_OIDC(o) container_of((o), struct ha_auth_s, oidc)
 
-static void ha_auth_free(ziti_auth_method_t *self);
-static int ha_auth_start(ziti_auth_method_t *self, auth_state_cb cb, void *ctx);
-static int ha_auth_mfa(ziti_auth_method_t *self, const char *code, auth_mfa_cb cb);
-static int ha_auth_stop(ziti_auth_method_t *self);
-static int ha_auth_refresh(ziti_auth_method_t *self);
-static const struct timeval *ha_expiration(ziti_auth_method_t *self);
-static int ha_ext_jwt(ziti_auth_method_t *self, const char *token);
-static int ha_set_endpoint(ziti_auth_method_t *self, const api_path *api);
+static void ha_auth_free(zt_auth_method_t *self);
+static int ha_auth_start(zt_auth_method_t *self, auth_state_cb cb, void *ctx);
+static int ha_auth_mfa(zt_auth_method_t *self, const char *code, auth_mfa_cb cb);
+static int ha_auth_stop(zt_auth_method_t *self);
+static int ha_auth_refresh(zt_auth_method_t *self);
+static const struct timeval *ha_expiration(zt_auth_method_t *self);
+static int ha_ext_jwt(zt_auth_method_t *self, const char *token);
+static int ha_set_endpoint(zt_auth_method_t *self, const api_path *api);
 static void config_cb(oidc_client_t *oidc, int status, const char *err);
 static cstr internal_oidc_path(const char *base, const char *path);
 
 struct ha_auth_s {
-    ziti_auth_method_t api;
+    zt_auth_method_t api;
 
     uv_loop_t *loop;
     auth_state_cb cb;
@@ -52,10 +52,10 @@ struct ha_auth_s {
     struct timeval expiration;
 };
 
-ziti_auth_method_t *new_oidc_auth(uv_loop_t *l, const api_path *api, tls_context *tls) {
+zt_auth_method_t *new_oidc_auth(uv_loop_t *l, const api_path *api, tls_context *tls) {
     struct ha_auth_s *auth = calloc(1, sizeof(*auth));
 
-    auth->api = (ziti_auth_method_t){
+    auth->api = (zt_auth_method_t){
         .kind = OIDC,
         .start = ha_auth_start,
         .set_endpoint = ha_set_endpoint,
@@ -78,7 +78,7 @@ ziti_auth_method_t *new_oidc_auth(uv_loop_t *l, const api_path *api, tls_context
     cstr oidc_url = internal_oidc_path(u, api->path);
     oidc_client_init(l, &auth->oidc, cstr_str(&oidc_url), tls);
     cstr_drop(&oidc_url);
-    return (ziti_auth_method_t*)auth;
+    return (zt_auth_method_t*)auth;
 }
 
 static cstr internal_oidc_path(const char *base, const char *path) {
@@ -102,7 +102,7 @@ static cstr internal_oidc_path(const char *base, const char *path) {
     return result;
 }
 
-static int ha_set_endpoint(ziti_auth_method_t *self, const api_path *api) {
+static int ha_set_endpoint(zt_auth_method_t *self, const api_path *api) {
     struct ha_auth_s *auth = HA_AUTH(self);
 
     model_list_clear(&auth->urls, free);
@@ -127,7 +127,7 @@ static void close_cb(oidc_client_t *oidc) {
     free(auth);
 }
 
-static void ha_auth_free(ziti_auth_method_t *self) {
+static void ha_auth_free(zt_auth_method_t *self) {
     struct ha_auth_s *auth = HA_AUTH(self);
     oidc_client_close(&auth->oidc, close_cb);
 }
@@ -174,7 +174,7 @@ static void token_cb(oidc_client_t *oidc, enum oidc_status status, const void *d
                 break;
             case OIDC_TOKEN_FAILED:
                 snprintf(err, sizeof(err), "failed to auth: %d", status);
-                auth->cb(auth->cb_ctx, ZitiAuthStateUnauthenticated, &(ziti_error){
+                auth->cb(auth->cb_ctx, ZitiAuthStateUnauthenticated, &(zt_error){
                         .err = status,
                         .message = err});
                 break;
@@ -203,7 +203,7 @@ static void config_cb(oidc_client_t *oidc, int status, const char *err) {
             ZITI_LOG(ERROR, "failed to configure OIDC[%s] (no more URLs to try): %d/%s",
                      prev_url, status, err);
             if (auth->cb) {
-                ziti_error error = {
+                zt_error error = {
                     .err = status,
                     .message = err,
                 };
@@ -224,13 +224,13 @@ static void config_cb(oidc_client_t *oidc, int status, const char *err) {
     }
 }
 
-static int ha_ext_jwt(ziti_auth_method_t *self, const char *token) {
+static int ha_ext_jwt(zt_auth_method_t *self, const char *token) {
     struct ha_auth_s *auth = HA_AUTH(self);
     oidc_client_token(&auth->oidc, token);
     return 0;
 }
 
-static int ha_auth_start(ziti_auth_method_t *self, auth_state_cb cb, void *ctx) {
+static int ha_auth_start(zt_auth_method_t *self, auth_state_cb cb, void *ctx) {
     struct ha_auth_s *auth = HA_AUTH(self);
     auth->cb = cb;
     auth->cb_ctx = ctx;
@@ -238,7 +238,7 @@ static int ha_auth_start(ziti_auth_method_t *self, auth_state_cb cb, void *ctx) 
     return oidc_client_configure(&auth->oidc, config_cb);
 }
 
-static int ha_auth_mfa(ziti_auth_method_t *self, const char *code, auth_mfa_cb cb) {
+static int ha_auth_mfa(zt_auth_method_t *self, const char *code, auth_mfa_cb cb) {
     struct ha_auth_s *auth = HA_AUTH(self);
     auth->mfa_cb = cb;
     if (oidc_client_mfa(&auth->oidc, code) != 0) {
@@ -249,20 +249,20 @@ static int ha_auth_mfa(ziti_auth_method_t *self, const char *code, auth_mfa_cb c
     return ZITI_OK;
 }
 
-static int ha_auth_stop(ziti_auth_method_t *self) {
+static int ha_auth_stop(zt_auth_method_t *self) {
     struct ha_auth_s *auth = HA_AUTH(self);
     auth->cb = NULL;
     auth->cb_ctx = NULL;
     return 0;
 }
 
-static int ha_auth_refresh(ziti_auth_method_t *self) {
+static int ha_auth_refresh(zt_auth_method_t *self) {
     struct ha_auth_s *auth = HA_AUTH(self);
 
     return oidc_client_refresh(&auth->oidc);
 }
 
-static const struct timeval *ha_expiration(ziti_auth_method_t *self) {
+static const struct timeval *ha_expiration(zt_auth_method_t *self) {
     struct ha_auth_s *auth = HA_AUTH(self);
     if (auth->expiration.tv_sec > 0) return &auth->expiration;
     return NULL;

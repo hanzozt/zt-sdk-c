@@ -1,5 +1,5 @@
-add_executable(ziti-ncat ziti-ncat.c)
-target_link_libraries(ziti-ncat PUBLIC ziti)
+add_executable(zt-ncat zt-ncat.c)
+target_link_libraries(zt-ncat PUBLIC zt)
 
-add_executable(ziti-socket-sample ziti-fd-client.c)
-target_link_libraries(ziti-socket-sample PUBLIC ziti)
+add_executable(zt-socket-sample zt-fd-client.c)
+target_link_libraries(zt-socket-sample PUBLIC zt)

@@ -1,5 +1,5 @@
 {
-  "name": "ziti",
+  "name": "zt",
   "version-semver": "1.0.0",
   "description": [
     "using vcpkg baseline: 2025.10.17"
@@ -41,7 +41,7 @@
       "description": "features for development",
       "dependencies": [
         {
-          "name": "ziti",
+          "name": "zt",
           "features": [ "test", "samples" ]
         }
       ]

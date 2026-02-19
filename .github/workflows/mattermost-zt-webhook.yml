@@ -1,0 +1,39 @@
+name: zt-mattermost-action-py
+on:
+  issues:
+  issue_comment:
+  pull_request_review:
+    types: [submitted]
+  pull_request_review_comment:
+  pull_request:
+    types: [opened, reopened]
+  push:
+  fork:
+  release:
+    types: [released]
+
+permissions:
+  contents: read
+
+jobs:
+  zt-webhook:
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    name: Ziti Mattermost Action - Py
+    steps:
+    - uses: hanzozt/zt-mattermost-action-py@v1
+      if: github.event_name != 'pull_request_review'
+      with:
+        ztId: ${{ secrets.ZITI_MATTERMOST_IDENTITY }}
+        webhookUrl: ${{ secrets.ZHOOK_URL_DEV_NOTIFICATIONS }}
+        eventJson: ${{ toJson(github.event) }}
+        senderUsername: "GitHubZ"
+
+    - uses: hanzozt/zt-mattermost-action-py@v1
+      if: github.event_name == 'pull_request_review' && github.event.review.state == 'approved'
+      with:
+        ztId: ${{ secrets.ZITI_MATTERMOST_IDENTITY }}
+        webhookUrl: ${{ secrets.ZHOOK_URL_DEV_NOTIFICATIONS }}
+        eventJson: ${{ toJson(github.event) }}
+        senderUsername: "GitHubZ"
+

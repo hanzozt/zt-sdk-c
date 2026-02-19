@@ -50,10 +50,10 @@ enum ChannelState {
 };
 
 static const char *edge_alpn[] = {
-        "ziti-edge",
+        "zt-edge",
 };
 
-static inline const char *ch_state_str(ziti_channel_t *ch) {
+static inline const char *ch_state_str(zt_channel_t *ch) {
     switch (ch->state) {
         case Initial:
             return to_str(Initial);
@@ -69,17 +69,17 @@ static inline const char *ch_state_str(ziti_channel_t *ch) {
     return "unexpected";
 }
 
-static const char *get_timeout_cb(ziti_channel_t *ch);
+static const char *get_timeout_cb(zt_channel_t *ch);
 
-static void reconnect_channel(ziti_channel_t *ch, bool now);
+static void reconnect_channel(zt_channel_t *ch, bool now);
 
 static void reconnect_cb(void *data);
 
 static void on_tls_connect(uv_connect_t *req, int status);
 
-static struct msg_receiver *find_receiver(ziti_channel_t *ch, uint32_t conn_id);
+static struct msg_receiver *find_receiver(zt_channel_t *ch, uint32_t conn_id);
 
-static void on_channel_close(ziti_channel_t *ch, int ziti_err, ssize_t uv_err);
+static void on_channel_close(zt_channel_t *ch, int zt_err, ssize_t uv_err);
 
 static void send_latency_probe(void *data);
 
@@ -89,10 +89,10 @@ static void hello_reply_cb(void *ctx, message *msg, int err);
 
 static void channel_alloc_cb(uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf);
 static void on_channel_data(uv_stream_t *s, ssize_t len, const uv_buf_t *buf);
-static void process_inbound(ziti_channel_t *ch);
+static void process_inbound(zt_channel_t *ch);
 static void on_tls_close(uv_handle_t *s);
 
-static inline void close_connection(ziti_channel_t *ch) {
+static inline void close_connection(zt_channel_t *ch) {
     tlsuv_stream_t *tls = ch->connection;
     ch->connection = NULL;
 
@@ -118,7 +118,7 @@ struct msg_receiver {
     void (*receive)(void *receiver, message *m, int code);
 };
 
-static void ch_init_stream(ziti_channel_t *ch) {
+static void ch_init_stream(zt_channel_t *ch) {
     assert(ch->connection == NULL);
 
     ch->connection = calloc(1, sizeof(*ch->connection));
@@ -130,11 +130,11 @@ static void ch_init_stream(ziti_channel_t *ch) {
     ch->reconnect = false;
 }
 
-int ziti_channel_prepare(ziti_channel_t *ch) {
+int zt_channel_prepare(zt_channel_t *ch) {
     process_inbound(ch);
 
     // process_inbound() may consume all message buffers from the pool,
-    // but it will put ziti connection(s) into `flush` state
+    // but it will put zt connection(s) into `flush` state
     // causing zero-timeout IO
     // and a flush attempt on the next loop iteration
     if (ch->state == Connected) {
@@ -147,7 +147,7 @@ int ziti_channel_prepare(ziti_channel_t *ch) {
     return 0;
 }
 
-static int ziti_channel_init(struct ziti_ctx *ctx, ziti_channel_t *ch, uint32_t id) {
+static int zt_channel_init(struct zt_ctx *ctx, zt_channel_t *ch, uint32_t id) {
     ch->ztx = ctx;
     ch->loop = ctx->loop;
     ch->id = id;
@@ -157,7 +157,7 @@ static int ziti_channel_init(struct ziti_ctx *ctx, ziti_channel_t *ch, uint32_t 
     size_t hostlen = sizeof(hostname);
     uv_os_gethostname(hostname, &hostlen);
 
-    snprintf(ch->token, sizeof(ch->token), "ziti-sdk-c[%d]@%*.*s", ch->id, (int) hostlen, (int) hostlen, hostname);
+    snprintf(ch->token, sizeof(ch->token), "zt-sdk-c[%d]@%*.*s", ch->id, (int) hostlen, (int) hostlen, hostname);
 
     ch->state = Initial;
 
@@ -169,12 +169,12 @@ static int ziti_channel_init(struct ziti_ctx *ctx, ziti_channel_t *ch, uint32_t 
 
     ch->waiters = (model_map){0};
 
-    ch->notify_cb = (ch_notify_state) ziti_on_channel_event;
+    ch->notify_cb = (ch_notify_state) zt_on_channel_event;
     ch->notify_ctx = ctx;
     return 0;
 }
 
-void ziti_channel_free(ziti_channel_t *ch) {
+void zt_channel_free(zt_channel_t *ch) {
     if (ch->connection) {
         ch->connection->data = NULL;
         ch->connection = NULL;
@@ -189,7 +189,7 @@ void ziti_channel_free(ziti_channel_t *ch) {
     FREE(ch->host);
 }
 
-int ziti_close_channels(struct ziti_ctx *ztx, int err) {
+int zt_close_channels(struct zt_ctx *ztx, int err) {
     const char *er_id;
     model_list ch_ids = {0};
     MODEL_MAP_FOR(it, ztx->channels) {
@@ -198,10 +198,10 @@ int ziti_close_channels(struct ziti_ctx *ztx, int err) {
 
     MODEL_LIST_FOR(it, ch_ids) {
         er_id = model_list_it_element(it);
-        ziti_channel_t *ch = model_map_get(&ztx->channels, er_id);
+        zt_channel_t *ch = model_map_get(&ztx->channels, er_id);
         if (ch != NULL) {
-            ZTX_LOG(DEBUG, "closing channel[%s]: %s", er_id, ziti_errorstr(err));
-            ziti_channel_close(ch, err);
+            ZTX_LOG(DEBUG, "closing channel[%s]: %s", er_id, zt_errorstr(err));
+            zt_channel_close(ch, err);
         }
     }
     model_list_clear(&ch_ids, NULL);
@@ -214,28 +214,28 @@ static void on_tls_close(uv_handle_t *s) {
     free(tls);
 }
 
-int ziti_channel_disconnect(ziti_channel_t *ch, int err) {
+int zt_channel_disconnect(zt_channel_t *ch, int err) {
     if (ch->state != Closed) {
         on_channel_close(ch, err, 0);
     }
     return 0;
 }
 
-int ziti_channel_close(ziti_channel_t *ch, int err) {
+int zt_channel_close(zt_channel_t *ch, int err) {
     if (ch->state != Closed) {
         CH_LOG(INFO, "closing[%s]", ch->name);
 
         on_channel_close(ch, err, 0);
         ch->state = Closed;
-        ziti_on_channel_event(ch, EdgeRouterRemoved, 0, ch->ztx);
+        zt_on_channel_event(ch, EdgeRouterRemoved, 0, ch->ztx);
 
-        ziti_channel_free(ch);
+        zt_channel_free(ch);
         free(ch);
     }
     return 0;
 }
 
-void ziti_channel_add_receiver(ziti_channel_t *ch, uint32_t id, void *receiver, void (*receive_f)(void *, message *, int)) {
+void zt_channel_add_receiver(zt_channel_t *ch, uint32_t id, void *receiver, void (*receive_f)(void *, message *, int)) {
     NEWP(r, struct msg_receiver);
     r->id = id;
     r->receiver = receiver;
@@ -245,7 +245,7 @@ void ziti_channel_add_receiver(ziti_channel_t *ch, uint32_t id, void *receiver, 
     CH_LOG(DEBUG, "added receiver[%u]", id);
 }
 
-void ziti_channel_rem_receiver(ziti_channel_t *ch, uint32_t id) {
+void zt_channel_rem_receiver(zt_channel_t *ch, uint32_t id) {
     if (ch == NULL) return;
 
     struct msg_receiver *r = model_map_removel(&ch->receivers, id);
@@ -256,27 +256,27 @@ void ziti_channel_rem_receiver(ziti_channel_t *ch, uint32_t id) {
     }
 }
 
-bool ziti_channel_is_connected(ziti_channel_t *ch) {
+bool zt_channel_is_connected(zt_channel_t *ch) {
     return ch->state == Connected;
 }
 
-uint64_t ziti_channel_latency(ziti_channel_t *ch) {
+uint64_t zt_channel_latency(zt_channel_t *ch) {
     return ch->latency;
 }
 
-static ziti_channel_t *new_ziti_channel(ziti_context ztx, const ziti_edge_router *er) {
-    ziti_channel_t *ch = calloc(1, sizeof(ziti_channel_t));
-    ziti_channel_init(ztx, ch, channel_counter++);
-    const ziti_identity *identity = ziti_get_identity(ztx);
+static zt_channel_t *new_zt_channel(zt_context ztx, const zt_edge_router *er) {
+    zt_channel_t *ch = calloc(1, sizeof(zt_channel_t));
+    zt_channel_init(ztx, ch, channel_counter++);
+    const zt_identity *identity = zt_get_identity(ztx);
     ch->name = strdup(er->name);
     CH_LOG(INFO, "(%s) new channel for ztx[%d] identity[%s]", ch->name, ztx->id, identity->name);
 
-    ziti_channel_set_url(ch, er->protocols.tls);
+    zt_channel_set_url(ch, er->protocols.tls);
     model_map_set(&ztx->channels, er->name, ch);
     return ch;
 }
 
-static void check_connecting_state(ziti_channel_t *ch) {
+static void check_connecting_state(zt_channel_t *ch) {
     // verify channel state
     bool reset = false;
     if (ch->deadline.expire_cb == NULL) {
@@ -301,9 +301,9 @@ static void check_connecting_state(ziti_channel_t *ch) {
 }
 
 static void token_update_cb(void *ctx, message *m, int status) {
-    ziti_channel_t *ch = ctx;
+    zt_channel_t *ch = ctx;
     if (status != ZITI_OK) {
-        CH_LOG(ERROR, "failed to update token: %d[%s]", status, ziti_errorstr(status));
+        CH_LOG(ERROR, "failed to update token: %d[%s]", status, zt_errorstr(status));
     } else if (m->header.content == ContentTypeUpdateTokenSuccess) {
         CH_LOG(DEBUG, "token update success");
     } else if (m->header.content == ContentTypeUpdateTokenFailure) {
@@ -313,7 +313,7 @@ static void token_update_cb(void *ctx, message *m, int status) {
     }
 }
 
-void ziti_channel_set_url(ziti_channel_t *ch, const char *url) {
+void zt_channel_set_url(zt_channel_t *ch, const char *url) {
     assert(ch != NULL);
     assert(url != NULL);
 
@@ -333,7 +333,7 @@ void ziti_channel_set_url(ziti_channel_t *ch, const char *url) {
     ch->port = ingress.port;
 }
 
-int ziti_channel_update_token(ziti_channel_t *ch, const char *token) {
+int zt_channel_update_token(zt_channel_t *ch, const char *token) {
     if (ch == NULL) {
         return ZITI_INVALID_STATE;
     }
@@ -347,13 +347,13 @@ int ziti_channel_update_token(ziti_channel_t *ch, const char *token) {
     }
 
     CH_LOG(DEBUG, "sending token update: %s", jwt_payload(token));
-    ziti_channel_send_for_reply(ch, ContentTypeUpdateToken, NULL, 0,
+    zt_channel_send_for_reply(ch, ContentTypeUpdateToken, NULL, 0,
                                 (const uint8_t *)token, strlen(token),
                                 token_update_cb, ch);
     return ZITI_OK;
 }
 
-int ziti_channel_force_connect(ziti_channel_t *ch) {
+int zt_channel_force_connect(zt_channel_t *ch) {
     if (ch == NULL) {
         return ZITI_INVALID_STATE;
     }
@@ -369,20 +369,20 @@ int ziti_channel_force_connect(ziti_channel_t *ch) {
     return ZITI_OK;
 }
 
-int ziti_channel_connect(ziti_context ztx, const ziti_edge_router* er) {
+int zt_channel_connect(zt_context ztx, const zt_edge_router* er) {
     const char *url = er->protocols.tls;
     if (url == NULL) {
         ZTX_LOG(DEBUG, "er[%s] does not have TLS edge listener", er->name);
         return ZITI_INVALID_CONFIG;
     }
 
-    ziti_channel_t *ch = model_map_get(&ztx->channels, er->name);
+    zt_channel_t *ch = model_map_get(&ztx->channels, er->name);
 
     if (ch != NULL) {
         ZTX_LOG(DEBUG, "existing ch[%d](%s) found for ingress[%s]", ch->id, ch_state_str(ch), url);
     }
     else {
-        ch = new_ziti_channel(ztx, er);
+        ch = new_zt_channel(ztx, er);
         ch->notify_cb(ch, EdgeRouterAdded, 0, ch->notify_ctx);
     }
 
@@ -397,9 +397,9 @@ int ziti_channel_connect(ziti_context ztx, const ziti_edge_router* er) {
 }
 
 void on_channel_send(uv_write_t *w, int status) {
-    struct ziti_write_req_s *zwreq = w->data;
+    struct zt_write_req_s *zwreq = w->data;
 
-    ziti_channel_t *ch = zwreq->ch;
+    zt_channel_t *ch = zwreq->ch;
     uint64_t now = uv_now(ch->loop);
 
     // time to get on-wire
@@ -435,21 +435,21 @@ void on_channel_send(uv_write_t *w, int status) {
     free(w);
 }
 
-int ziti_channel_send_message(ziti_channel_t *ch, message *msg, struct ziti_write_req_s *ziti_write) {
+int zt_channel_send_message(zt_channel_t *ch, message *msg, struct zt_write_req_s *zt_write) {
     uv_buf_t buf = uv_buf_init((char *) msg->msgbufp, msg->msgbuflen);
     message_set_seq(msg, &ch->msg_seq);
     CH_LOG(TRACE, "=> ct[%s] seq[%d] len[%d]", content_type_id(msg->header.content),
            msg->header.seq, msg->header.body_len);
 
     NEWP(req, uv_write_t);
-    if (ziti_write == NULL) {
-        ziti_write = calloc(1, sizeof(struct ziti_write_req_s));
+    if (zt_write == NULL) {
+        zt_write = calloc(1, sizeof(struct zt_write_req_s));
     }
-    ziti_write->ch = ch;
+    zt_write->ch = ch;
 
-    req->data = ziti_write;
-    ziti_write->message = msg;
-    ziti_write->start_ts = uv_now(ch->loop);
+    req->data = zt_write;
+    zt_write->message = msg;
+    zt_write->start_ts = uv_now(ch->loop);
     ch->out_q++;
     ch->out_q_bytes += buf.len;
     int rc = tlsuv_stream_write(req, ch->connection, &buf, on_channel_send);
@@ -460,18 +460,18 @@ int ziti_channel_send_message(ziti_channel_t *ch, message *msg, struct ziti_writ
     return 0;
 }
 
-int ziti_channel_send(ziti_channel_t *ch, uint32_t content, const hdr_t *hdrs, int nhdrs, const uint8_t *body,
+int zt_channel_send(zt_channel_t *ch, uint32_t content, const hdr_t *hdrs, int nhdrs, const uint8_t *body,
                       uint32_t body_len,
-                      struct ziti_write_req_s *ziti_write) {
+                      struct zt_write_req_s *zt_write) {
     message *m = message_new(NULL, content, hdrs, nhdrs, body_len);
     message_set_seq(m, &ch->msg_seq);
     CH_LOG(TRACE, "=> ct[%s] seq[%d] len[%d]", content_type_id(content), m->header.seq, body_len);
     memcpy(m->body, body, body_len);
 
-    return ziti_channel_send_message(ch, m, ziti_write);
+    return zt_channel_send_message(ch, m, zt_write);
 }
 
-void ziti_channel_remove_waiter(ziti_channel_t *ch, struct waiter_s *waiter) {
+void zt_channel_remove_waiter(zt_channel_t *ch, struct waiter_s *waiter) {
     if (ch && waiter) {
         struct waiter_s *w = model_map_removel(&ch->waiters, (long)waiter->seq);
         assert(w == waiter);
@@ -479,7 +479,7 @@ void ziti_channel_remove_waiter(ziti_channel_t *ch, struct waiter_s *waiter) {
     }
 }
 
-struct waiter_s *ziti_channel_send_for_reply(ziti_channel_t *ch, uint32_t content,
+struct waiter_s *zt_channel_send_for_reply(zt_channel_t *ch, uint32_t content,
                                              const hdr_t *hdrs, int nhdrs,
                                              const uint8_t *body, uint32_t body_len,
                                              reply_cb rep_cb, void *reply_ctx) {
@@ -492,7 +492,7 @@ struct waiter_s *ziti_channel_send_for_reply(ziti_channel_t *ch, uint32_t conten
 
     uint32_t seq = m->header.seq;
 
-    int rc = ziti_channel_send_message(ch, m, NULL);
+    int rc = zt_channel_send_message(ch, m, NULL);
 
     if (rc == ZITI_OK) {
         NEWP(w, struct waiter_s);
@@ -508,7 +508,7 @@ struct waiter_s *ziti_channel_send_for_reply(ziti_channel_t *ch, uint32_t conten
     return result;
 }
 
-static struct msg_receiver *find_receiver(ziti_channel_t *ch, uint32_t conn_id) {
+static struct msg_receiver *find_receiver(zt_channel_t *ch, uint32_t conn_id) {
     struct msg_receiver *c = model_map_getl(&ch->receivers, conn_id);
     return c;
 }
@@ -532,7 +532,7 @@ static bool is_edge(uint32_t content) {
     }
 }
 
-static void dispatch_message(ziti_channel_t *ch, message *m) {
+static void dispatch_message(zt_channel_t *ch, message *m) {
     struct waiter_s *w = NULL;
 
     uint32_t reply_to;
@@ -575,7 +575,7 @@ static void dispatch_message(ziti_channel_t *ch, message *m) {
                 char msg[128];
                 size_t len = snprintf(msg, sizeof(msg), "invalid conn id [%d]", conn_id);
                 message *reply = new_inspect_result(m->header.seq, conn_id, ConnTypeInvalid, msg, len);
-                ziti_channel_send_message(ch, reply, NULL);
+                zt_channel_send_message(ch, reply, NULL);
             } else if (ct != ContentTypeStateClosed) {
                 // close confirmation is OK if connection is gone already
                 CH_LOG(WARN, "received message without conn_id or for unknown connection ct[%s] conn_id[%d]",
@@ -591,7 +591,7 @@ static void dispatch_message(ziti_channel_t *ch, message *m) {
     }
 }
 
-static void process_inbound(ziti_channel_t *ch) {
+static void process_inbound(zt_channel_t *ch) {
     uint8_t *ptr;
     ssize_t len;
     int rc = 0;
@@ -648,7 +648,7 @@ static void process_inbound(ziti_channel_t *ch) {
                 rc = parse_hdrs(msg->headers, msg->header.headers_len, &msg->hdrs);
                 if (rc < 0) {
                     pool_return_obj(msg);
-                    CH_LOG(ERROR, "failed to parse incoming message: %s", ziti_errorstr(rc));
+                    CH_LOG(ERROR, "failed to parse incoming message: %s", zt_errorstr(rc));
                     break;
                 }
                 msg->nhdrs = rc;
@@ -665,10 +665,10 @@ static void process_inbound(ziti_channel_t *ch) {
 }
 
 static void latency_reply_cb(void *ctx, message *reply, int err) {
-    ziti_channel_t *ch = ctx;
+    zt_channel_t *ch = ctx;
 
     if (err) {
-        CH_LOG(DEBUG, "latency probe was canceled: %d(%s)", err, ziti_errorstr(err));
+        CH_LOG(DEBUG, "latency probe was canceled: %d(%s)", err, zt_errorstr(err));
         ch->latency = UINT64_MAX;
         return;
     }
@@ -685,14 +685,14 @@ static void latency_reply_cb(void *ctx, message *reply, int err) {
 }
 
 static void latency_timeout(void *data) {
-    ziti_channel_t *ch = data;
+    zt_channel_t *ch = data;
     if (uv_now(ch->loop) - MAX(ch->last_read, ch->last_write) < LATENCY_TIMEOUT) {
         CH_LOG(DEBUG, "latency timeout on active channel, extending timeout");
         ztx_set_deadline(ch->ztx, LATENCY_TIMEOUT, &ch->deadline, latency_timeout, ch);
     } else {
         CH_LOG(ERROR, "no read/write traffic on channel since before latency probe was sent, closing channel");
 
-        ziti_channel_remove_waiter(ch, ch->latency_waiter);
+        zt_channel_remove_waiter(ch, ch->latency_waiter);
         ch->latency_waiter = NULL;
         ch->latency = UINT64_MAX;
 
@@ -701,7 +701,7 @@ static void latency_timeout(void *data) {
 }
 
 static void send_latency_probe(void *data) {
-    ziti_channel_t *ch = data;
+    zt_channel_t *ch = data;
     uint64_t now = htole64(uv_now(ch->loop));
     hdr_t headers[] = {
             {
@@ -712,14 +712,14 @@ static void send_latency_probe(void *data) {
     };
 
     ztx_set_deadline(ch->ztx, LATENCY_TIMEOUT, &ch->deadline, latency_timeout, ch);
-    ch->latency_waiter = ziti_channel_send_for_reply(ch, ContentTypeLatencyType,
+    ch->latency_waiter = zt_channel_send_for_reply(ch, ContentTypeLatencyType,
                                                      headers, 1, NULL, 0, latency_reply_cb, ch);
 
 }
 
 static void hello_reply_cb(void *ctx, message *msg, int err) {
     int cb_code = ZITI_OK;
-    ziti_channel_t *ch = ctx;
+    zt_channel_t *ch = ctx;
     bool success = false;
 
     if (msg && msg->header.content == ContentTypeResultType) {
@@ -730,7 +730,7 @@ static void hello_reply_cb(void *ctx, message *msg, int err) {
         cb_code = ZITI_GATEWAY_UNAVAILABLE;
     }
     else {
-        CH_LOG(ERROR, "failed to receive Hello response due to %d(%s)", err, ziti_errorstr(err));
+        CH_LOG(ERROR, "failed to receive Hello response due to %d(%s)", err, zt_errorstr(err));
         cb_code = ZITI_GATEWAY_UNAVAILABLE;
     }
 
@@ -755,7 +755,7 @@ static void hello_reply_cb(void *ctx, message *msg, int err) {
     }
 }
 
-static void send_hello(ziti_channel_t *ch, const char *token) {
+static void send_hello(zt_channel_t *ch, const char *token) {
     uint8_t true_val = 1;
     hdr_t headers[] = {
             {
@@ -770,12 +770,12 @@ static void send_hello(ziti_channel_t *ch, const char *token) {
             },
     };
     ch->latency = uv_now(ch->loop);
-    ziti_channel_send_for_reply(ch, ContentTypeHelloType, headers, 2, (uint8_t *) ch->token, strlen(ch->token), hello_reply_cb, ch);
+    zt_channel_send_for_reply(ch, ContentTypeHelloType, headers, 2, (uint8_t *) ch->token, strlen(ch->token), hello_reply_cb, ch);
 }
 
 
 static void ch_connect_timeout(void *data) {
-    ziti_channel_t *ch = data;
+    zt_channel_t *ch = data;
     CH_LOG(ERROR, "connect timeout");
 
     if (ch->connection && ch->connection->conn_req == NULL) {
@@ -787,10 +787,10 @@ static void ch_connect_timeout(void *data) {
 }
 
 static void reconnect_cb(void *data) {
-    ziti_channel_t *ch = data;
-    ziti_context ztx = ch->ztx;
+    zt_channel_t *ch = data;
+    zt_context ztx = ch->ztx;
 
-    if (ziti_get_api_session_token(ztx) == NULL) {
+    if (zt_get_api_session_token(ztx) == NULL) {
         CH_LOG(INFO, "ztx[%d] is not fully authenticated (auth_state[%d]), delaying re-connect",
                ztx->id, ztx->auth_state);
         reconnect_channel(ch, false);
@@ -817,7 +817,7 @@ static void reconnect_cb(void *data) {
     }
 }
 
-static void reconnect_channel(ziti_channel_t *ch, bool now) {
+static void reconnect_channel(zt_channel_t *ch, bool now) {
     if (ch->state == Closed) {
         CH_LOG(DEBUG, "not reconnecting closed channel");
         return;
@@ -845,8 +845,8 @@ static void reconnect_channel(ziti_channel_t *ch, bool now) {
     ztx_set_deadline(ch->ztx, timeout, &ch->deadline, reconnect_cb, ch);
 }
 
-static void on_channel_close(ziti_channel_t *ch, int ziti_err, ssize_t uv_err) {
-    ziti_context ztx = ch->ztx;
+static void on_channel_close(zt_channel_t *ch, int zt_err, ssize_t uv_err) {
+    zt_context ztx = ch->ztx;
 
     if (ch->state == Closed || ch->state == Disconnected) {
         return;
@@ -855,7 +855,7 @@ static void on_channel_close(ziti_channel_t *ch, int ziti_err, ssize_t uv_err) {
     if (ch->state == Connected) {
         CH_LOG(WARN, "disconnected from edge router[%s] %zd(%s)",
                ch->name, uv_err, uv_err ? uv_strerror((int)uv_err) : "OK");
-        ch->notify_cb(ch, EdgeRouterDisconnected, ziti_err, ch->notify_ctx);
+        ch->notify_cb(ch, EdgeRouterDisconnected, zt_err, ch->notify_ctx);
     }
     ch->state = Disconnected;
 
@@ -866,7 +866,7 @@ static void on_channel_close(ziti_channel_t *ch, int ziti_err, ssize_t uv_err) {
     while (it != NULL) {
         struct waiter_s *w = model_map_it_value(it);
         it = model_map_it_remove(it);
-        w->cb(w->reply_ctx, NULL, ziti_err);
+        w->cb(w->reply_ctx, NULL, zt_err);
         free(w);
     }
 
@@ -874,7 +874,7 @@ static void on_channel_close(ziti_channel_t *ch, int ziti_err, ssize_t uv_err) {
     while (it != NULL) {
         struct msg_receiver *con = model_map_it_value(it);
         it = model_map_it_remove(it);
-        con->receive(con->receiver, NULL, (int) ziti_err);
+        con->receive(con->receiver, NULL, (int) zt_err);
         free(con);
     }
 
@@ -889,7 +889,7 @@ static void on_channel_close(ziti_channel_t *ch, int ziti_err, ssize_t uv_err) {
 
     close_connection(ch);
 
-    if (ziti_err == ZITI_DISABLED || ziti_err == ZITI_GATEWAY_UNAVAILABLE) {
+    if (zt_err == ZITI_DISABLED || zt_err == ZITI_GATEWAY_UNAVAILABLE) {
         return;
     }
 
@@ -899,7 +899,7 @@ static void on_channel_close(ziti_channel_t *ch, int ziti_err, ssize_t uv_err) {
 
 static void channel_alloc_cb(uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf) {
     tlsuv_stream_t *tls = (tlsuv_stream_t *) handle;
-    ziti_channel_t *ch = tls->data;
+    zt_channel_t *ch = tls->data;
     if (ch->in_next || pool_has_available(ch->in_msg_pool)) {
         buf->base = (char *) malloc(suggested_size);
         if (buf->base == NULL) {
@@ -918,7 +918,7 @@ static void channel_alloc_cb(uv_handle_t *handle, size_t suggested_size, uv_buf_
 
 static void on_channel_data(uv_stream_t *s, ssize_t len, const uv_buf_t *buf) {
     tlsuv_stream_t *tls = (tlsuv_stream_t *) s;
-    ziti_channel_t *ch = tls->data;
+    zt_channel_t *ch = tls->data;
 
     if (len == UV_ENOBUFS) {
         tlsuv_stream_read_stop(tls);
@@ -956,7 +956,7 @@ static void on_tls_connect(uv_connect_t *req, int status) {
         goto done;
     }
 
-    ziti_channel_t *ch = tls->data;
+    zt_channel_t *ch = tls->data;
     assert(ch);
 
     if (tls != ch->connection) {
@@ -968,7 +968,7 @@ static void on_tls_connect(uv_connect_t *req, int status) {
     }
 
     if (status == 0) {
-        const char *token = ziti_get_api_session_token(ch->ztx);
+        const char *token = zt_get_api_session_token(ch->ztx);
         if (token != NULL) {
             CH_LOG(DEBUG, "connected sending Hello with token[%s]", jwt_payload(token));
             tlsuv_stream_read_start(tls, channel_alloc_cb, on_channel_data);
@@ -996,7 +996,7 @@ XX(ch_connect_timeout) \
 XX(reconnect_cb)    \
 XX(send_latency_probe)
 
-static const char *get_timeout_cb(ziti_channel_t *ch) {
+static const char *get_timeout_cb(zt_channel_t *ch) {
 #define to_lbl(n) if (ch->deadline.expire_cb == (n)) return #n;
 
     TIMEOUT_CALLBACKS(to_lbl)
@@ -1005,29 +1005,29 @@ static const char *get_timeout_cb(ziti_channel_t *ch) {
 }
 
 static void on_posture_update_reply(void *ctx, message *m, int status) {
-    ziti_channel_t *ch = ctx;
+    zt_channel_t *ch = ctx;
     if (status != ZITI_OK) {
-        CH_LOG(ERROR, "failed to update posture: %d[%s]", status, ziti_errorstr(status));
+        CH_LOG(ERROR, "failed to update posture: %d[%s]", status, zt_errorstr(status));
     } else {
         CH_LOG(INFO, "received ContentType[%04x]", m->header.content);
     }
 }
 
-int ziti_channel_update_posture(ziti_channel_t *ch, const uint8_t *data, size_t len) {
+int zt_channel_update_posture(zt_channel_t *ch, const uint8_t *data, size_t len) {
     if (ch->state == Connected) {
-        ziti_channel_send(ch, ContentTypePostureResponse, NULL, 0, data, len, NULL);
+        zt_channel_send(ch, ContentTypePostureResponse, NULL, 0, data, len, NULL);
         return ZITI_OK;
     }
 
     return ZITI_GATEWAY_UNAVAILABLE;
 }
 
-int ch_send_conn_closed(ziti_channel_t *ch, uint32_t conn_id) {
+int ch_send_conn_closed(zt_channel_t *ch, uint32_t conn_id) {
     hdr_t hdr = (hdr_t) {
             .header_id = ConnIdHeader,
             .length = sizeof(conn_id),
             .value = (const uint8_t *) &conn_id,
     };
 
-    return ziti_channel_send(ch, ContentTypeStateClosed, &hdr, 1, NULL, 0, NULL);
+    return zt_channel_send(ch, ContentTypeStateClosed, &hdr, 1, NULL, 0, NULL);
 }

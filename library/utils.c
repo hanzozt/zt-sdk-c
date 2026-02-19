@@ -14,13 +14,13 @@
 
 #include <uv.h>
 #include <tlsuv/tlsuv.h>
-#include <ziti/ziti_model.h>
-#include <ziti/ziti_log.h>
+#include <zt/zt_model.h>
+#include <zt/zt_log.h>
 #include <stdarg.h>
 
 #include "utils.h"
 #include "tlsuv/http.h"
-#include "ziti/errors.h"
+#include "zt/errors.h"
 #include "stickiness.h"
 
 #include <sodium/utils.h>
@@ -89,7 +89,7 @@ static const char *const level_labels[] = {
 
 static const char *basename(const char *path);
 
-const char *ziti_get_build_version(int verbose) {
+const char *zt_get_build_version(int verbose) {
     if (verbose) {
         return "\n\tVersion:\t" to_str(ZITI_VERSION)
                "\n\tBuild Date:\t" __DATE__ " " __TIME__
@@ -107,19 +107,19 @@ const char *ziti_get_build_version(int verbose) {
 #endif
 }
 
-const char* ziti_git_branch() {
+const char* zt_git_branch() {
     return to_str(ZITI_BRANCH);
 }
 
-const char* ziti_git_commit() {
+const char* zt_git_commit() {
     return to_str(ZITI_COMMIT);
 }
 
 static const char *TLSUV_MODULE = "tlsuv";
 
 static model_map log_levels;
-static int ziti_log_lvl = ZITI_LOG_DEFAULT_LEVEL;
-static FILE *ziti_debug_out;
+static int zt_log_lvl = ZITI_LOG_DEFAULT_LEVEL;
+static FILE *zt_debug_out;
 static bool log_initialized = false;
 static uv_pid_t log_pid = 0;
 
@@ -142,37 +142,37 @@ static void init_debug(uv_loop_t *loop);
 
 static void init_uv_mbed_log();
 
-void ziti_log_init(uv_loop_t *loop, int level, log_writer log_func) {
+void zt_log_init(uv_loop_t *loop, int level, log_writer log_func) {
     init_uv_mbed_log();
 
     init_debug(loop);
 
     if (level == ZITI_LOG_DEFAULT_LEVEL) {
-        level = ziti_log_lvl;
+        level = zt_log_lvl;
     }
 
     if (log_func == NULL) {
         // keep the logger if it was already set
-        ziti_log_set_logger(logger ? logger : default_log_writer);
+        zt_log_set_logger(logger ? logger : default_log_writer);
     } else {
-        ziti_log_set_logger(log_func);
+        zt_log_set_logger(log_func);
     }
 
-    ziti_log_set_level(level, NULL);
+    zt_log_set_level(level, NULL);
 
     uv_timeval64_t start_time;
     uv_gettimeofday(&start_time);
 
     char time_str[32];
-    ziti_fmt_time(time_str, sizeof(time_str), &start_time);
+    zt_fmt_time(time_str, sizeof(time_str), &start_time);
 
     ZITI_LOG(INFO, "Ziti C SDK version %s @%s(%s) starting at (%s.%03d)",
-            ziti_get_build_version(false), ziti_git_commit(), ziti_git_branch(),
+            zt_get_build_version(false), zt_git_commit(), zt_git_branch(),
             time_str, start_time.tv_usec / 1000);
 
 }
 
-void ziti_log_set_level(int level, const char *marker) {
+void zt_log_set_level(int level, const char *marker) {
     if (level > TRACE) {
         level = TRACE;
     } else if (level < 0) {
@@ -190,18 +190,18 @@ void ziti_log_set_level(int level, const char *marker) {
                 tlsuv_set_debug(level, tlsuv_logger);
             }
         } else {
-            ziti_log_lvl = level;
+            zt_log_lvl = level;
         }
     }
 
     if (logger) {
-        int l = level == ZITI_LOG_DEFAULT_LEVEL ? ziti_log_lvl : level;
+        int l = level == ZITI_LOG_DEFAULT_LEVEL ? zt_log_lvl : level;
         const char *lbl = level_labels[l];
         ZITI_LOG(INFO, "set log level: %s=%d/%s", marker ? marker : "root", l, lbl);
     }
 }
 
-int ziti_log_level(const char *module, const char *file) {
+int zt_log_level(const char *module, const char *file) {
     int level;
 
     file = basename(file);
@@ -215,19 +215,19 @@ int ziti_log_level(const char *module, const char *file) {
         if (level) { return level; }
     }
 
-    return ziti_log_lvl;
+    return zt_log_lvl;
 }
 
-const char* ziti_log_level_label() {
+const char* zt_log_level_label() {
     int num_levels = sizeof(level_labels) / sizeof(const char *);
-    if (ziti_log_lvl >= 0 && ziti_log_lvl < num_levels) {
-        return level_labels[ziti_log_lvl];
+    if (zt_log_lvl >= 0 && zt_log_lvl < num_levels) {
+        return level_labels[zt_log_lvl];
     } else {
         return NULL;
     }
 }
 
-void ziti_log_set_level_by_label(const char* log_level) {
+void zt_log_set_level_by_label(const char* log_level) {
     int lvl = ZITI_LOG_DEFAULT_LEVEL;
     int num_levels = sizeof(level_labels) / sizeof(const char *);
     for (int i = 0;i < num_levels; i++) {
@@ -236,11 +236,11 @@ void ziti_log_set_level_by_label(const char* log_level) {
         }
     }
     if (lvl != ZITI_LOG_DEFAULT_LEVEL) {
-        ziti_log_set_level(lvl, NULL);
+        zt_log_set_level(lvl, NULL);
     }
 }
 
-void ziti_log_set_logger(log_writer log) {
+void zt_log_set_logger(log_writer log) {
     logger = log;
 }
 
@@ -273,13 +273,13 @@ static void init_debug(uv_loop_t *loop) {
     ts_loop = loop;
     log_initialized = true;
 
-    if (ziti_log_lvl == ZITI_LOG_DEFAULT_LEVEL) {
-        ziti_log_lvl = ERROR;
+    if (zt_log_lvl == ZITI_LOG_DEFAULT_LEVEL) {
+        zt_log_lvl = ERROR;
     }
 
     // always log TLSUV errors, but preserve existing level if it has already been set
-    if (ziti_log_level(TLSUV_MODULE, NULL) == 0) {
-        ziti_log_set_level(ERROR, TLSUV_MODULE);
+    if (zt_log_level(TLSUV_MODULE, NULL) == 0) {
+        zt_log_set_level(ERROR, TLSUV_MODULE);
     }
     model_list levels = {0};
     str_split(getenv("ZITI_LOG"), ";:", &levels);
@@ -294,7 +294,7 @@ static void init_debug(uv_loop_t *loop) {
         }
         else {
             l = (int) strtol(lvl, NULL, 10);
-            ziti_log_lvl = l;
+            zt_log_lvl = l;
         }
     }
     model_list_clear(&levels, free);
@@ -304,7 +304,7 @@ static void init_debug(uv_loop_t *loop) {
         tlsuv_set_debug(tlsuv_level, tlsuv_logger);
     }
 
-    ziti_debug_out = stderr;
+    zt_debug_out = stderr;
 
     starttime = uv_now(loop);
 }
@@ -331,7 +331,7 @@ static const char *basename(const char *path) {
 
 static THREAD_LOCAL char log_buf[LOG_LINE_LENGTH];
 
-void ziti_logger(int level, const char *module, const char *file, unsigned int line, const char *func, FORMAT_STRING(const char *fmt), ...) {
+void zt_logger(int level, const char *module, const char *file, unsigned int line, const char *func, FORMAT_STRING(const char *fmt), ...) {
     log_writer logfunc = logger;
     if (logfunc == NULL) { return; }
 
@@ -381,11 +381,11 @@ void ziti_logger(int level, const char *module, const char *file, unsigned int l
 
 static void default_log_writer(int level, const char *loc, const char *msg, size_t msglen) {
     const char *elapsed = get_elapsed();
-    fprintf(ziti_debug_out, "(%u)[%s] %7s %s %.*s\n", log_pid, elapsed, level_labels[level], loc, (unsigned int) msglen, msg);
+    fprintf(zt_debug_out, "(%u)[%s] %7s %s %.*s\n", log_pid, elapsed, level_labels[level], loc, (unsigned int) msglen, msg);
 }
 
 void tlsuv_logger(int level, const char *file, unsigned int line, const char *msg) {
-    ziti_logger(level, TLSUV_MODULE, file, line, NULL, "%s", msg);
+    zt_logger(level, TLSUV_MODULE, file, line, NULL, "%s", msg);
 }
 
 static const char *get_elapsed_time() {
@@ -455,7 +455,7 @@ void hexDump (char *desc, void *addr, int len) {
     ZITI_LOG(DEBUG, " ");
 }
 
-void ziti_fmt_time(char* time_str, size_t time_str_sz, uv_timeval64_t* tv) {
+void zt_fmt_time(char* time_str, size_t time_str_sz, uv_timeval64_t* tv) {
     if (tv == NULL) {
         strncpy(time_str, "null tv", time_str_sz);
     } else {
@@ -760,7 +760,7 @@ static void json_req_cb(tlsuv_http_resp_t *resp, void *ctx) {
     resp->body_cb = json_body_cb;
 }
 
-tlsuv_http_req_t* ziti_json_request(
+tlsuv_http_req_t* zt_json_request(
     tlsuv_http_t *clt, const char *method, const char *path,
     void (*cb)(tlsuv_http_resp_t *resp, const char *err, json_object *content, void *ctx),
     void *ctx) {

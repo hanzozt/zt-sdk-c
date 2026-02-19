@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <ziti/ziti.h>
+#include <zt/zt.h>
 #include <string.h>
-#include "ziti/ziti_log.h"
+#include "zt/zt_log.h"
 
 struct app_ctx {
     uv_loop_t *loop;
-    ziti_context ztx;
+    zt_context ztx;
 
     model_map bindings;
 };
@@ -26,73 +26,73 @@ struct app_ctx {
 typedef struct {
     char *service_id;
     char *service_name;
-    ziti_server_cfg_v1 *host_cfg;
-    ziti_connection server;
+    zt_server_cfg_v1 *host_cfg;
+    zt_connection server;
     struct app_ctx *app;
 } host_binding;
 
 typedef struct {
-    ziti_connection ziti_conn;
+    zt_connection zt_conn;
     uv_tcp_t tcp;
 } host_connection;
 
 static const char *config_types[] = {
-        "ziti-tunneler-server.v1"
+        "zt-tunneler-server.v1"
 };
 
-static void on_ziti_event(ziti_context ztx, const ziti_event_t *event);
+static void on_zt_event(zt_context ztx, const zt_event_t *event);
 
-static void bind_service(struct app_ctx *app, ziti_context ztx, ziti_service *s, ziti_server_cfg_v1 *host_cfg);
+static void bind_service(struct app_ctx *app, zt_context ztx, zt_service *s, zt_server_cfg_v1 *host_cfg);
 
 int main(int argc, char *argv[]) {
     uv_loop_t *loop = uv_default_loop();
-    ziti_log_init(loop, ZITI_LOG_DEFAULT_LEVEL, NULL);
+    zt_log_init(loop, ZITI_LOG_DEFAULT_LEVEL, NULL);
 
     struct app_ctx ctx = {
             .loop = loop,
     };
 
-    ziti_config cfg;
-    ziti_context ztx = NULL;
+    zt_config cfg;
+    zt_context ztx = NULL;
 
 #define check(op) do{ \
 int err = (op); if (err != ZITI_OK) { \
-fprintf(stderr, "ERROR: %s", ziti_errorstr(err)); \
+fprintf(stderr, "ERROR: %s", zt_errorstr(err)); \
 exit(err);\
 }}while(0)
 
-    check(ziti_load_config(&cfg, argv[1]));
-    check(ziti_context_init(&ztx, &cfg));
-    check(ziti_context_set_options(ztx, &(ziti_options){
+    check(zt_load_config(&cfg, argv[1]));
+    check(zt_context_init(&ztx, &cfg));
+    check(zt_context_set_options(ztx, &(zt_options){
             .app_ctx = &ctx,
             .refresh_interval = 60,
             .config_types = config_types,
-            .event_cb = on_ziti_event,
+            .event_cb = on_zt_event,
             .events = ZitiContextEvent | ZitiServiceEvent,
     }));
 
-    ziti_context_run(ztx, loop);
+    zt_context_run(ztx, loop);
 
     uv_run(loop, UV_RUN_DEFAULT);
 }
 
-void on_ziti_event(ziti_context ztx, const ziti_event_t *event) {
-    struct app_ctx *ctx = ziti_app_ctx(ztx);
+void on_zt_event(zt_context ztx, const zt_event_t *event) {
+    struct app_ctx *ctx = zt_app_ctx(ztx);
 
     if (event->type == ZitiServiceEvent) {
-        const struct ziti_service_event *se = &event->service;
+        const struct zt_service_event *se = &event->service;
         for (int i = 0; se->added[i] != NULL; i++) {
-            ziti_service *s = se->added[i];
+            zt_service *s = se->added[i];
             if ((s->perm_flags & ZITI_CAN_BIND) == 0) {
                 continue;
             }
 
-            ziti_server_cfg_v1 *host_cfg = calloc(1, sizeof(ziti_server_cfg_v1));
-            int rc = ziti_service_get_config(s, config_types[0], host_cfg,
-                                             (int (*)(void *, const char *, size_t)) parse_ziti_server_cfg_v1);
+            zt_server_cfg_v1 *host_cfg = calloc(1, sizeof(zt_server_cfg_v1));
+            int rc = zt_service_get_config(s, config_types[0], host_cfg,
+                                             (int (*)(void *, const char *, size_t)) parse_zt_server_cfg_v1);
             if (rc != ZITI_OK) {
-                fprintf(stderr, "skipping service[%s] hosting config: %s\n", s->name, ziti_errorstr(rc));
-                free_ziti_server_cfg_v1(host_cfg);
+                fprintf(stderr, "skipping service[%s] hosting config: %s\n", s->name, zt_errorstr(rc));
+                free_zt_server_cfg_v1(host_cfg);
                 free(host_cfg);
                 continue;
             }
@@ -121,13 +121,13 @@ static void on_tcp_close(uv_handle_t *s) {
     free(hc);
 }
 
-static void ziti_proxy_close_cb(ziti_connection c) {
-    host_connection *hc = ziti_conn_data(c);
+static void zt_proxy_close_cb(zt_connection c) {
+    host_connection *hc = zt_conn_data(c);
     uv_close((uv_handle_t *) &hc->tcp, on_tcp_close);
 }
 
-static ssize_t on_ziti_data(ziti_connection c, const uint8_t *b, ssize_t len) {
-    host_connection *hc = ziti_conn_data(c);
+static ssize_t on_zt_data(zt_connection c, const uint8_t *b, ssize_t len) {
+    host_connection *hc = zt_conn_data(c);
 
     if (len > 0) {
         uv_write_t *wr = calloc(1, sizeof(uv_write_t));
@@ -143,7 +143,7 @@ static ssize_t on_ziti_data(ziti_connection c, const uint8_t *b, ssize_t len) {
         uv_shutdown(sr, (uv_stream_t *) &hc->tcp, on_tcp_shutdown);
     } else {
         uv_read_stop((uv_stream_t *) &hc->tcp);
-        ziti_close(hc->ziti_conn, ziti_proxy_close_cb);
+        zt_close(hc->zt_conn, zt_proxy_close_cb);
     }
     return len;
 }
@@ -157,26 +157,26 @@ static void alloc_cb(uv_handle_t *h, size_t len, uv_buf_t *b) {
     }
 }
 
-static void on_ziti_write(ziti_connection c, ssize_t status, void *ctx) {
+static void on_zt_write(zt_connection c, ssize_t status, void *ctx) {
     free(ctx);
 
     if (status < ZITI_OK) {
-        host_connection *hc = ziti_conn_data(c);
+        host_connection *hc = zt_conn_data(c);
         uv_read_stop((uv_stream_t *) &hc->tcp);
-        ziti_close(c, ziti_proxy_close_cb);
+        zt_close(c, zt_proxy_close_cb);
     }
 }
 
 static void on_tcp_data(uv_stream_t *s, ssize_t len, const uv_buf_t *buf) {
     host_connection *hc = s->data;
     if (len > 0) {
-        ziti_write(hc->ziti_conn, (uint8_t *) buf->base, len, on_ziti_write, buf->base);
+        zt_write(hc->zt_conn, (uint8_t *) buf->base, len, on_zt_write, buf->base);
     } else {
         if (len == UV_EOF) {
-            ziti_close_write(hc->ziti_conn);
+            zt_close_write(hc->zt_conn);
         } else {
             printf("tcp peer closed: %s\n", uv_strerror((int)len));
-            ziti_close(hc->ziti_conn, ziti_proxy_close_cb);
+            zt_close(hc->zt_conn, zt_proxy_close_cb);
         }
 
         if (buf->base) {
@@ -185,15 +185,15 @@ static void on_tcp_data(uv_stream_t *s, ssize_t len, const uv_buf_t *buf) {
     }
 }
 
-static void on_accept(ziti_connection c, int status) {
-    printf("ziti connection established\n");
+static void on_accept(zt_connection c, int status) {
+    printf("zt connection established\n");
 }
 
 static void on_tcp_connect(uv_connect_t *cr, int status) {
     uv_tcp_t *tcp = (uv_tcp_t *) cr->handle;
     host_connection *hc = tcp->data;
     if (status == 0) {
-        ziti_accept(hc->ziti_conn, on_accept, on_ziti_data);
+        zt_accept(hc->zt_conn, on_accept, on_zt_data);
         uv_read_start(cr->handle, alloc_cb, on_tcp_data);
     }
 
@@ -201,8 +201,8 @@ static void on_tcp_connect(uv_connect_t *cr, int status) {
 }
 
 /************* Binding functions *************/
-static void listen_cb(ziti_connection server, int status) {
-    host_binding *b = ziti_conn_data(server);
+static void listen_cb(zt_connection server, int status) {
+    host_binding *b = zt_conn_data(server);
     if (status == ZITI_OK) {
         printf("successfully bound to service[%s]\n", b->service_name);
     } else {
@@ -211,9 +211,9 @@ static void listen_cb(ziti_connection server, int status) {
     }
 }
 
-static void on_client(ziti_connection server, ziti_connection conn, int status, const ziti_client_ctx *clt_ctx) {
+static void on_client(zt_connection server, zt_connection conn, int status, const zt_client_ctx *clt_ctx) {
     if (status == ZITI_OK) {
-        host_binding *binding = ziti_conn_data(server);
+        host_binding *binding = zt_conn_data(server);
         struct app_ctx *app = binding->app;
 
         printf("accepting connection from <<<%s>>>\n", clt_ctx->caller_id);
@@ -228,7 +228,7 @@ static void on_client(ziti_connection server, ziti_connection conn, int status, 
         }
 
         host_connection *hc = calloc(1, sizeof(host_connection));
-        hc->ziti_conn = conn;
+        hc->zt_conn = conn;
         uv_tcp_init(app->loop, &hc->tcp);
         uv_handle_set_data((uv_handle_t *) &hc->tcp, hc);
 
@@ -237,27 +237,27 @@ static void on_client(ziti_connection server, ziti_connection conn, int status, 
             uv_freeaddrinfo(resolve.addrinfo);
             fprintf(stderr, "failed to connect to tcp:%s:%" PRIu64 "\n",
                     binding->host_cfg->hostname, binding->host_cfg->port);
-            ziti_close(hc->ziti_conn, NULL);
+            zt_close(hc->zt_conn, NULL);
             free(hc);
             free(cr);
             return;
         }
 
         uv_freeaddrinfo(resolve.addrinfo);
-        ziti_conn_set_data(hc->ziti_conn, hc);
+        zt_conn_set_data(hc->zt_conn, hc);
     } else {
-        fprintf(stderr, "hosting error: %d(%s)\n", status, ziti_errorstr(status));
+        fprintf(stderr, "hosting error: %d(%s)\n", status, zt_errorstr(status));
     }
 }
 
-void bind_service(struct app_ctx *app, ziti_context ztx, ziti_service *s, ziti_server_cfg_v1 *host_cfg) {
+void bind_service(struct app_ctx *app, zt_context ztx, zt_service *s, zt_server_cfg_v1 *host_cfg) {
     host_binding *b = calloc(1, sizeof(host_binding));
     b->app = app;
     b->service_id = strdup(s->id);
     b->service_name = strdup(s->name);
     b->host_cfg = host_cfg;
-    ziti_conn_init(ztx, &b->server, b);
-    ziti_listen(b->server, b->service_name, listen_cb, on_client);
+    zt_conn_init(ztx, &b->server, b);
+    zt_listen(b->server, b->service_name, listen_cb, on_client);
 
     model_map_set(&app->bindings, s->id, b);
 }

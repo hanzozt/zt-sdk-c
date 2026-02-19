@@ -16,7 +16,7 @@
 #include "catch2_includes.hpp"
 #include <catch2/generators/catch_generators.hpp>
 
-#include <ziti/model_support.h>
+#include <zt/model_support.h>
 #include <iostream>
 #include <tuple>
 

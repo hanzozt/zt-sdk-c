@@ -5,7 +5,7 @@
 # Targets necessary to build the project must be provided unconditionally, so
 # consumers can trivially build and package the project
 if (PROJECT_IS_TOP_LEVEL)
-    option(ziti_DEVELOPER_MODE "Enable developer mode" OFF)
+    option(zt_DEVELOPER_MODE "Enable developer mode" OFF)
     option(BUILD_SHARED_LIBS "Build shared libs." ON)
     option(BUILD_STATIC_LIBS "Build static libs." ON)
 
@@ -20,12 +20,12 @@ endif ()
 set(warning_guard "")
 if (NOT PROJECT_IS_TOP_LEVEL)
     option(
-            ziti_INCLUDES_WITH_SYSTEM
-            "Use SYSTEM modifier for ziti's includes, disabling warnings"
+            zt_INCLUDES_WITH_SYSTEM
+            "Use SYSTEM modifier for zt's includes, disabling warnings"
             ON
     )
-    mark_as_advanced(ziti_INCLUDES_WITH_SYSTEM)
-    if (ziti_INCLUDES_WITH_SYSTEM)
+    mark_as_advanced(zt_INCLUDES_WITH_SYSTEM)
+    if (zt_INCLUDES_WITH_SYSTEM)
         set(warning_guard SYSTEM)
     endif ()
 endif ()

@@ -13,21 +13,21 @@
 // limitations under the License.
 
 #include <catch2/catch_all.hpp>
-#include <ziti/zitilib.h>
-#include <ziti/ziti.h>
+#include <zt/ztlib.h>
+#include <zt/zt.h>
 #include <tlsuv/tlsuv.h>
 
 #include "fixtures.h"
 #include "oidc.h"
-#include "ziti/ziti_log.h"
+#include "zt/zt_log.h"
 #include "test-data.h"
 
 
 TEST_CASE_METHOD(LoopTestCase, "ha-oidc", "[integ]") {
     auto l = loop();
-    ziti_log_init(l, 4, NULL);
-    ziti_config cfg;
-    REQUIRE(ziti_load_config(&cfg, TEST_CLIENT) == ZITI_OK);
+    zt_log_init(l, 4, NULL);
+    zt_config cfg;
+    REQUIRE(zt_load_config(&cfg, TEST_CLIENT) == ZITI_OK);
     auto tls = default_tls_context(cfg.id.ca, strlen(cfg.id.ca));
     tlsuv_certificate_t cert;
     tlsuv_private_key_t key;
@@ -99,5 +99,5 @@ TEST_CASE_METHOD(LoopTestCase, "ha-oidc", "[integ]") {
     cert->free(cert);
     tls->free_ctx(tls);
 
-    free_ziti_config(&cfg);
+    free_zt_config(&cfg);
 }

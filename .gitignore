@@ -10,7 +10,7 @@ cmake-build-*/
 **/bin/
 **/Debug/
 *.user
-ziti_libs/
+zt_libs/
 
 #docfx related
 docfx_site

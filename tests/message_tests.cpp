@@ -17,7 +17,7 @@
 #include <cstring>
 #include "message.h"
 #include "edge_protocol.h"
-#include "ziti/errors.h"
+#include "zt/errors.h"
 
 TEST_CASE("simple", "[model]") {
     auto p = pool_new(sizeof(message) + 200, 3, (void (*)(void *)) message_free);

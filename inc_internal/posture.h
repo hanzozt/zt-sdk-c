@@ -41,13 +41,13 @@ struct posture_checks {
     model_map active_work;
 };
 
-void ziti_posture_init(ziti_context ztx, long interval_secs);
+void zt_posture_init(zt_context ztx, long interval_secs);
 
-void ziti_posture_checks_free(struct posture_checks *pcs);
+void zt_posture_checks_free(struct posture_checks *pcs);
 
-void ziti_send_posture_data(ziti_context ztx);
+void zt_send_posture_data(zt_context ztx);
 
-bool ziti_service_has_query_with_timeout(ziti_service *service);
+bool zt_service_has_query_with_timeout(zt_service *service);
 
 #ifdef __cplusplus
 }

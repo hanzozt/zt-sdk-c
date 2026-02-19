@@ -20,10 +20,10 @@
 #include <uv.h>
 #include <stdlib.h>
 #include <tlsuv/http.h>
-#include <ziti/ziti_log.h>
+#include <zt/zt_log.h>
 
-#include "ziti/model_collections.h"
-#include "ziti/model_support.h"
+#include "zt/model_collections.h"
+#include "zt/model_support.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -57,17 +57,17 @@ extern "C" {
 #define z_typeof(x) typeof(x)
 #endif
 #endif
-extern const char *ziti_get_build_version(int verbose);
+extern const char *zt_get_build_version(int verbose);
 
-extern const char *ziti_git_branch();
+extern const char *zt_git_branch();
 
-extern const char *ziti_git_commit();
+extern const char *zt_git_commit();
 
 extern void hexDump(char *desc, void *addr, int len);
 
 extern const char *jwt_payload(const char *jwt);
 
-void ziti_fmt_time(char *time_str, size_t time_str_len, uv_timeval64_t *tv);
+void zt_fmt_time(char *time_str, size_t time_str_len, uv_timeval64_t *tv);
 
 int lt_zero(int v);
 
@@ -157,7 +157,7 @@ int load_file(const char *path, size_t pathlen, char **content, size_t *size);
 
 uint64_t next_backoff(int *count, int max, uint64_t base);
 
-tlsuv_http_req_t* ziti_json_request(
+tlsuv_http_req_t* zt_json_request(
     tlsuv_http_t *clt, const char *method, const char *path,
     void (*cb)(tlsuv_http_resp_t *resp, const char *err, json_object *content, void *ctx),
     void *ctx);

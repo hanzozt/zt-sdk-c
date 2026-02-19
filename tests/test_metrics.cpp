@@ -17,7 +17,7 @@ limitations under the License.
 #include "catch2_includes.hpp"
 #include <metrics.h>
 #include <cstring>
-#include <ziti/enums.h>
+#include <zt/enums.h>
 
 
 TEST_CASE("test-metrics", "[metrics]") {

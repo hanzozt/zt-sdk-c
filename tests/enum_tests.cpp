@@ -15,7 +15,7 @@
 
 #include "catch2_includes.hpp"
 
-#include <ziti/model_support.h>
+#include <zt/model_support.h>
 
 #define States(XX,...)\
 XX(Good, __VA_ARGS__) \

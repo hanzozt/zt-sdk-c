@@ -25,10 +25,10 @@
 #include <sys/poll.h>
 #endif
 
-#include "ziti/ziti_log.h"
+#include "zt/zt_log.h"
 #include "utils.h"
-#include "ziti/errors.h"
-#include "ziti/ziti_buffer.h"
+#include "zt/errors.h"
+#include "zt/zt_buffer.h"
 #include "ext_oidc.h"
 #include "buffer.h"
 
@@ -73,7 +73,7 @@
 
 static void ext_oidc_client_set_tokens(ext_oidc_client_t *clt, json_object *tok_json);
 
-static int ext_oidc_client_set_cfg(ext_oidc_client_t *clt, const ziti_jwt_signer *cfg);
+static int ext_oidc_client_set_cfg(ext_oidc_client_t *clt, const zt_jwt_signer *cfg);
 
 static void failed_auth_req(struct auth_req *req, const char *error);
 
@@ -129,11 +129,11 @@ static void handle_unexpected_resp(ext_oidc_client_t *clt, tlsuv_http_resp_t *re
 }
 
 int ext_oidc_client_init(uv_loop_t *loop, ext_oidc_client_t *clt,
-                     const ziti_jwt_signer *cfg) {
+                     const zt_jwt_signer *cfg) {
     assert(clt != NULL);
     assert(cfg != NULL);
     if (cfg->provider_url == NULL) {
-        ZITI_LOG(ERROR, "ziti_jwt_signer.provider_url is missing");
+        ZITI_LOG(ERROR, "zt_jwt_signer.provider_url is missing");
         return ZITI_INVALID_CONFIG;
     }
 
@@ -147,7 +147,7 @@ int ext_oidc_client_init(uv_loop_t *loop, ext_oidc_client_t *clt,
     clt->link_ctx = NULL;
 
     if (tlsuv_http_init(loop, &clt->http, cfg->provider_url) != 0) {
-        OIDC_LOG(ERROR, "ziti_jwt_signer.provider_url[%s] is invalid", cfg->provider_url);
+        OIDC_LOG(ERROR, "zt_jwt_signer.provider_url[%s] is invalid", cfg->provider_url);
         return ZITI_INVALID_CONFIG;
     }
     int rc = ext_oidc_client_set_cfg(clt, cfg);
@@ -167,8 +167,8 @@ int ext_oidc_client_init(uv_loop_t *loop, ext_oidc_client_t *clt,
     return 0;
 }
 
-int ext_oidc_client_set_cfg(ext_oidc_client_t *clt, const ziti_jwt_signer *cfg) {
-    free_ziti_jwt_signer(&clt->signer_cfg);
+int ext_oidc_client_set_cfg(ext_oidc_client_t *clt, const zt_jwt_signer *cfg) {
+    free_zt_jwt_signer(&clt->signer_cfg);
 
     clt->signer_cfg.client_id = cfg->client_id ? strdup(cfg->client_id) : NULL;
     clt->signer_cfg.provider_url = strdup(cfg->provider_url);
@@ -245,7 +245,7 @@ int ext_oidc_client_configure(ext_oidc_client_t *clt, oidc_config_cb cb) {
 
     OIDC_LOG(DEBUG, "configuring provider[%s]", clt->signer_cfg.provider_url);
     tlsuv_http_set_url(&clt->http, clt->signer_cfg.provider_url);
-    ziti_json_request(&clt->http, "GET", OIDC_CONFIG, internal_config_cb, clt);
+    zt_json_request(&clt->http, "GET", OIDC_CONFIG, internal_config_cb, clt);
     return 0;
 }
 
@@ -327,7 +327,7 @@ static void request_token(auth_req *req, const char *auth_code) {
     const char *token_url = json_object_get_string(token_ep);
     ZITI_LOG(INFO, "requesting token path[%s] auth[%s]", token_url, auth_code);
     tlsuv_http_set_url(&clt->http, token_url);
-    tlsuv_http_req_t *token_req = ziti_json_request(&clt->http, "POST", NULL, token_cb, req);
+    tlsuv_http_req_t *token_req = zt_json_request(&clt->http, "POST", NULL, token_cb, req);
     tlsuv_http_pair form[] = {
             {"state",         req->state},
             {"code",          auth_code},
@@ -686,7 +686,7 @@ int ext_oidc_client_close(ext_oidc_client_t *clt, ext_oidc_close_cb cb) {
     tlsuv_http_close(&clt->http, http_close_cb);
     uv_close((uv_handle_t *) clt->timer, (uv_close_cb) free);
     clt->timer = NULL;
-    free_ziti_jwt_signer(&clt->signer_cfg);
+    free_zt_jwt_signer(&clt->signer_cfg);
 
     if (clt->request) {
         failed_auth_req(clt->request, strerror(ECANCELED));
@@ -702,12 +702,12 @@ static void ext_oidc_client_set_tokens(ext_oidc_client_t *clt, json_object *tok_
     if (clt->token_cb) {
         const char *token_type;
         switch (clt->signer_cfg.target_token) {
-            case ziti_target_token_id_token:
+            case zt_target_token_id_token:
                 token_type = "id_token";
                 break;
 
-            case ziti_target_token_access_token:
-            case ziti_target_token_Unknown:
+            case zt_target_token_access_token:
+            case zt_target_token_Unknown:
             default:
                 token_type = "access_token";
                 break;
@@ -782,7 +782,7 @@ static void ext_refresh_time_cb(uv_timer_t *t) {
     const char *token_url = json_object_get_string(token_ep);
 
     tlsuv_http_set_url(&clt->http, token_url);
-    tlsuv_http_req_t *req = ziti_json_request(&clt->http, "POST", NULL, refresh_cb, clt);
+    tlsuv_http_req_t *req = zt_json_request(&clt->http, "POST", NULL, refresh_cb, clt);
     tlsuv_http_req_header(req, "Authorization",
                           get_basic_auth_header(clt->signer_cfg.client_id));
     const char *refresher = json_object_get_string(tok);

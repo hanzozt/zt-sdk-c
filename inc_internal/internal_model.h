@@ -16,8 +16,8 @@
 #ifndef ZITI_SDK_INTERNAL_MODEL_H
 #define ZITI_SDK_INTERNAL_MODEL_H
 
-#include "ziti/model_support.h"
-#include "ziti/ziti_model.h"
+#include "zt/model_support.h"
+#include "zt/zt_model.h"
 
 // internal model is not exported
 #ifdef MODEL_VISIBILITY
@@ -25,7 +25,7 @@
 #endif
 #define MODEL_VISIBILITY
 
-// extends ziti_identity
+// extends zt_identity
 #define ZITI_IDENTITY_DATA_MODEL(XX, ...) \
 ZITI_IDENTITY_MODEL(XX, __VA_ARGS__) \
 XX(default_hosting_precendence, model_string, none, defaultHostingPrecendence, __VA_ARGS__) \
@@ -39,16 +39,16 @@ XX(tls, model_string, none, tls, __VA_ARGS__)
 
 #define ZITI_EDGE_ROUTER_MODEL(XX, ...)\
 XX(name, model_string, none, name, __VA_ARGS__)\
-XX(protocols, ziti_er_protocols, none, supportedProtocols, __VA_ARGS__)
+XX(protocols, zt_er_protocols, none, supportedProtocols, __VA_ARGS__)
 
 #define ZITI_SERVICE_EDGE_ROUTERS_MODEL(XX, ...) \
-XX(routers, ziti_edge_router, array, edgeRouters, __VA_ARGS__)
+XX(routers, zt_edge_router, array, edgeRouters, __VA_ARGS__)
 
 #define ZITI_SESSION_MODEL(XX, ...) \
 XX(token, model_string, none, token, __VA_ARGS__)\
 XX(id, model_string, none, id, __VA_ARGS__)      \
 XX(api_session_id, model_string, none, apiSessionId, __VA_ARGS__) \
-XX(edge_routers, ziti_edge_router, list, edgeRouters, __VA_ARGS__) \
+XX(edge_routers, zt_edge_router, list, edgeRouters, __VA_ARGS__) \
 XX(service_id, model_string, none, serviceId, __VA_ARGS__) \
 XX(refresh, model_bool, none, , __VA_ARGS__)
 
@@ -63,15 +63,15 @@ XX(expireSeconds, model_number, none, expirationSeconds, __VA_ARGS__) \
 XX(updated, timestamp, none, updatedAt, __VA_ARGS__) \
 XX(cached_last_activity_at, timestamp, none, cachedLastActivityAt, __VA_ARGS__) \
 XX(identity_id, model_string, none, identityId, __VA_ARGS__) \
-XX(identity, ziti_identity, none, identity, __VA_ARGS__) \
-XX(posture_query_set, ziti_posture_query_set, array, postureQueries, __VA_ARGS__) \
+XX(identity, zt_identity, none, identity, __VA_ARGS__) \
+XX(posture_query_set, zt_posture_query_set, array, postureQueries, __VA_ARGS__) \
 XX(is_mfa_required, model_bool, none, isMfaRequired, __VA_ARGS__) \
 XX(is_mfa_complete, model_bool, none, isMfaComplete, __VA_ARGS__) \
 XX(is_cert_improper, model_bool, none, improperClientCertChain, __VA_ARGS__) \
 XX(is_cert_extendable, model_bool, none, isCertExtendable, __VA_ARGS__) \
 XX(cert_extend_requested, model_bool, none, isCertExtendRequested, __VA_ARGS__) \
 XX(key_roll_requested, model_bool, none, isCertKeyRollRequested, __VA_ARGS__) \
-XX(auth_queries, ziti_auth_query_mfa, list, authQueries, __VA_ARGS__) \
+XX(auth_queries, zt_auth_query_mfa, list, authQueries, __VA_ARGS__) \
 XX(authenticator_id, model_string, none, authenticatorId, __VA_ARGS__)
 
 #define ZITI_ERROR_MODEL(XX, ...) \
@@ -104,7 +104,7 @@ XX(name, model_string, none, name, __VA_ARGS__) \
 XX(token, model_string, none, token, __VA_ARGS__)
 
 #define ZITI_ENROLLMENT_JWT_MODEL(XX, ...) \
-XX(method, ziti_enrollment_method, none, em, __VA_ARGS__) \
+XX(method, zt_enrollment_method, none, em, __VA_ARGS__) \
 XX(controller, model_string, none, iss, __VA_ARGS__)      \
 XX(subject, model_string, none, sub, __VA_ARGS__)         \
 XX(controllers, model_string, list, ctrls, __VA_ARGS__)   \
@@ -128,8 +128,8 @@ XX(hostname, model_string, none, hostname, __VA_ARGS__)    \
 XX(domain, model_string, none, domain, __VA_ARGS__)
 
 #define ZITI_AUTH_REQ(XX, ...) \
-XX(sdk_info, ziti_sdk_info, none, sdkInfo, __VA_ARGS__) \
-XX(env_info, ziti_env_info, ptr, envInfo, __VA_ARGS__) \
+XX(sdk_info, zt_sdk_info, none, sdkInfo, __VA_ARGS__) \
+XX(env_info, zt_env_info, ptr, envInfo, __VA_ARGS__) \
 XX(config_types, model_string, list, configTypes, __VA_ARGS__)
 
 #define ZITI_ENROLLMENT_RESP(XX, ...) \
@@ -137,7 +137,7 @@ XX(cert, model_string, none, cert, __VA_ARGS__)
 
 #define ZITI_PR_BASE(XX, ...) \
 XX(id, model_string, none, id, __VA_ARGS__) \
-XX(typeId, ziti_posture_query_type, none, typeId, __VA_ARGS__)
+XX(typeId, zt_posture_query_type, none, typeId, __VA_ARGS__)
 
 #define ZITI_PR_MAC_REQ(XX, ...) \
 ZITI_PR_BASE(XX, __VA_ARGS__)  \
@@ -172,7 +172,7 @@ XX(woken, model_bool, none, woken, __VA_ARGS__)
 
 #define ZITI_AUTH_QUERY_MFA_MODEL(XX, ...) \
 XX(id, model_string, none, id, __VA_ARGS__) \
-XX(type_id, ziti_auth_query_type, none, typeId, __VA_ARGS__) \
+XX(type_id, zt_auth_query_type, none, typeId, __VA_ARGS__) \
 XX(provider, model_string, none, provider, __VA_ARGS__) \
 XX(http_method, model_string, none, httpMethod, __VA_ARGS__) \
 XX(http_url, model_string, none, httpUrl, __VA_ARGS__) \
@@ -188,7 +188,7 @@ XX(timeout, model_number, ptr, timeout, __VA_ARGS__) \
 XX(timeoutRemaining, model_number, ptr, timeoutRemaining, __VA_ARGS__)
 
 #define ZITI_PR_RESPONSE(XX, ...) \
-XX(services, ziti_service_timer, array, services, __VA_ARGS__)
+XX(services, zt_service_timer, array, services, __VA_ARGS__)
 
 #define ZITI_SERVICE_UPDATE(XX, ...) \
 XX(last_change, model_string, none, lastChangeAt, __VA_ARGS__)
@@ -244,82 +244,82 @@ XX(fingerprint, model_string, none, fingerprint, __VA_ARGS__)
 extern "C" {
 #endif
 
-DECLARE_ENUM(ziti_enrollment_method, ZITI_ENROLLMENT_METHOD)
+DECLARE_ENUM(zt_enrollment_method, ZITI_ENROLLMENT_METHOD)
 DECLARE_ENUM(jwt_sig_method, JWT_SIG_METHOD)
 
-DECLARE_MODEL(ziti_identity_data, ZITI_IDENTITY_DATA_MODEL)
+DECLARE_MODEL(zt_identity_data, ZITI_IDENTITY_DATA_MODEL)
 
-DECLARE_MODEL(ziti_er_protocols, ZITI_ER_PROTOCOLS)
+DECLARE_MODEL(zt_er_protocols, ZITI_ER_PROTOCOLS)
 
-DECLARE_MODEL(ziti_edge_router, ZITI_EDGE_ROUTER_MODEL)
+DECLARE_MODEL(zt_edge_router, ZITI_EDGE_ROUTER_MODEL)
 
-DECLARE_MODEL(ziti_service_routers, ZITI_SERVICE_EDGE_ROUTERS_MODEL)
+DECLARE_MODEL(zt_service_routers, ZITI_SERVICE_EDGE_ROUTERS_MODEL)
 
-DECLARE_MODEL(ziti_session, ZITI_SESSION_MODEL)
+DECLARE_MODEL(zt_session, ZITI_SESSION_MODEL)
 
-DECLARE_MODEL(ziti_api_session, ZITI_API_SESSION_MODEL)
+DECLARE_MODEL(zt_api_session, ZITI_API_SESSION_MODEL)
 
-DECLARE_MODEL(ziti_error, ZITI_ERROR_MODEL)
+DECLARE_MODEL(zt_error, ZITI_ERROR_MODEL)
 
-DECLARE_MODEL(ziti_enrollment_jwt_header, ZITI_ENROLLMENT_JWT_HEADER_MODEL)
+DECLARE_MODEL(zt_enrollment_jwt_header, ZITI_ENROLLMENT_JWT_HEADER_MODEL)
 
-DECLARE_MODEL(ziti_enrollment_jwt, ZITI_ENROLLMENT_JWT_MODEL)
+DECLARE_MODEL(zt_enrollment_jwt, ZITI_ENROLLMENT_JWT_MODEL)
 
-DECLARE_MODEL(ziti_network_jwt, ZITI_NETWORK_JWT)
+DECLARE_MODEL(zt_network_jwt, ZITI_NETWORK_JWT)
 
-DECLARE_MODEL(ziti_enrollment_resp, ZITI_ENROLLMENT_RESP)
+DECLARE_MODEL(zt_enrollment_resp, ZITI_ENROLLMENT_RESP)
 
-DECLARE_MODEL(ziti_sdk_info, ZITI_SDK_INFO_MODEL)
+DECLARE_MODEL(zt_sdk_info, ZITI_SDK_INFO_MODEL)
 
-DECLARE_MODEL(ziti_env_info, ZITI_ENV_INFO_MODEL)
+DECLARE_MODEL(zt_env_info, ZITI_ENV_INFO_MODEL)
 
-DECLARE_MODEL(ziti_auth_req, ZITI_AUTH_REQ)
+DECLARE_MODEL(zt_auth_req, ZITI_AUTH_REQ)
 
-DECLARE_MODEL(ziti_pr_mac_req, ZITI_PR_MAC_REQ)
+DECLARE_MODEL(zt_pr_mac_req, ZITI_PR_MAC_REQ)
 
-DECLARE_MODEL(ziti_pr_os_req, ZITI_PR_OS_REQ)
+DECLARE_MODEL(zt_pr_os_req, ZITI_PR_OS_REQ)
 
-DECLARE_MODEL(ziti_pr_process, ZITI_PR_PROCESS)
+DECLARE_MODEL(zt_pr_process, ZITI_PR_PROCESS)
 
-DECLARE_MODEL(ziti_pr_process_req, ZITI_PR_PROCESS_REQ)
+DECLARE_MODEL(zt_pr_process_req, ZITI_PR_PROCESS_REQ)
 
-DECLARE_MODEL(ziti_pr_endpoint_state_req, ZITI_PR_ENDPOINT_STATE_REQ)
+DECLARE_MODEL(zt_pr_endpoint_state_req, ZITI_PR_ENDPOINT_STATE_REQ)
 
-DECLARE_MODEL(ziti_pr_domain_req, ZITI_PR_DOMAIN_REQ)
+DECLARE_MODEL(zt_pr_domain_req, ZITI_PR_DOMAIN_REQ)
 
-DECLARE_MODEL(ziti_auth_query_mfa, ZITI_AUTH_QUERY_MFA_MODEL)
+DECLARE_MODEL(zt_auth_query_mfa, ZITI_AUTH_QUERY_MFA_MODEL)
 
-DECLARE_MODEL(ziti_service_update, ZITI_SERVICE_UPDATE)
+DECLARE_MODEL(zt_service_update, ZITI_SERVICE_UPDATE)
 
-DECLARE_MODEL(ziti_mfa_code_req, ZITI_MFA_CODE_REQ)
+DECLARE_MODEL(zt_mfa_code_req, ZITI_MFA_CODE_REQ)
 
-DECLARE_MODEL(ziti_mfa_recovery_codes, ZITI_MFA_RECOVERY_CODES_MODEL)
+DECLARE_MODEL(zt_mfa_recovery_codes, ZITI_MFA_RECOVERY_CODES_MODEL)
 
-DECLARE_MODEL(ziti_service_timer, ZITI_SERVICE_TIMER)
+DECLARE_MODEL(zt_service_timer, ZITI_SERVICE_TIMER)
 
-DECLARE_MODEL(ziti_pr_response, ZITI_PR_RESPONSE)
+DECLARE_MODEL(zt_pr_response, ZITI_PR_RESPONSE)
 
-DECLARE_MODEL(ziti_extend_cert_authenticator_req, ZITI_EXTEND_CERT_AUTHENTICATOR_REQ)
+DECLARE_MODEL(zt_extend_cert_authenticator_req, ZITI_EXTEND_CERT_AUTHENTICATOR_REQ)
 
-DECLARE_MODEL(ziti_verify_extend_cert_authenticator_req, ZITI_VERIFY_EXTEND_CERT_AUTHENTICATOR_REQ)
+DECLARE_MODEL(zt_verify_extend_cert_authenticator_req, ZITI_VERIFY_EXTEND_CERT_AUTHENTICATOR_REQ)
 
-DECLARE_MODEL(ziti_authenticator, ZITI_AUTHENTICATOR_MODEL)
+DECLARE_MODEL(zt_authenticator, ZITI_AUTHENTICATOR_MODEL)
 
-DECLARE_MODEL(ziti_extend_cert_authenticator_resp, ZITI_EXTEND_CERT_AUTHENTICATOR_RESP)
+DECLARE_MODEL(zt_extend_cert_authenticator_resp, ZITI_EXTEND_CERT_AUTHENTICATOR_RESP)
 
-DECLARE_MODEL(ziti_create_api_cert_req, ZITI_CREATE_API_CERT_REQ)
+DECLARE_MODEL(zt_create_api_cert_req, ZITI_CREATE_API_CERT_REQ)
 
-DECLARE_MODEL(ziti_create_api_cert_resp, ZITI_CREATE_API_CERT_RESP)
+DECLARE_MODEL(zt_create_api_cert_resp, ZITI_CREATE_API_CERT_RESP)
 
 DECLARE_MODEL(api_address, API_ADDRESS_MODEL)
 
 DECLARE_MODEL(ctrl_apis, CTRL_APIS_MODEL)
 
-DECLARE_MODEL(ziti_controller_detail, ZITI_CONTROLLER_DETAIL)
+DECLARE_MODEL(zt_controller_detail, ZITI_CONTROLLER_DETAIL)
 
-DECLARE_MODEL(ziti_pr_base, ZITI_PR_BASE)
+DECLARE_MODEL(zt_pr_base, ZITI_PR_BASE)
 
-bool ziti_has_capability(const ziti_version *v, ziti_ctrl_cap c);
+bool zt_has_capability(const zt_version *v, zt_ctrl_cap c);
 
 #ifdef __cplusplus
 }

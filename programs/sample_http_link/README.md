@@ -20,27 +20,27 @@ allowed to reach (dial) the service.
 We will need a host and client identity. If you already have a network with identities, you can reuse them, just 
 ensure you update the attributes. Here's how you would generate them.
 ```
-ziti edge create identity device httpbin.server -a httpbinServerEndpoints -o httpbin.server.jwt
-ziti edge create identity device httpbin.client -a httpbinClientEndpoints -o httpbin.client.jwt
+zt edge create identity device httpbin.server -a httpbinServerEndpoints -o httpbin.server.jwt
+zt edge create identity device httpbin.client -a httpbinClientEndpoints -o httpbin.client.jwt
 ```
 ### Enroll the Identities
 The identities need to be [enrolled](https://hanzozt.dev/docs/learn/core-concepts/identities/enrolling) so the 
 controller knows about them.
 ```
-ziti edge enroll httpbin.server.jwt
-ziti edge enroll httpbin.client.jwt
+zt edge enroll httpbin.server.jwt
+zt edge enroll httpbin.client.jwt
 ```
 
 ### Create a Host Service Config
 It is easier to create the service config before the actual service. The config can then be supplied when creating the 
 service.
 ```
-ziti edge create config httpbin-host.v1 host.v1 '{"protocol":"tcp", "address":"httpbin.org","port":80}'
+zt edge create config httpbin-host.v1 host.v1 '{"protocol":"tcp", "address":"httpbin.org","port":80}'
 ```
 ### Create a Service
 Create a service and attach the previously created host config using the `--configs` flag.
 ```
-ziti edge create service httpbin --configs httpbin-host.v1
+zt edge create service httpbin --configs httpbin-host.v1
 ```
 ### Create Service Policies
 Lastly, we need to create service policies. Service policies define which identities interact with which services, and 
@@ -48,18 +48,18 @@ the actions they are authorized to perform on a service. In this case, we create
 with the `httpbinServerEndpoints` attribute to bind to this service. The Dial policy defines which identities can dial 
 the service. In this case, any identity with the `httpbinClientEndpoints` attribute can dial this service.
 ```
-ziti edge create service-policy httpbin-binding Bind --service-roles '@httpbin' --identity-roles '#httpbinServerEndpoints'
-ziti edge create service-policy httpbin-dialing Dial --service-roles '@httpbin' --identity-roles '#httpbinClientEndpoints'
+zt edge create service-policy httpbin-binding Bind --service-roles '@httpbin' --identity-roles '#httpbinServerEndpoints'
+zt edge create service-policy httpbin-dialing Dial --service-roles '@httpbin' --identity-roles '#httpbinClientEndpoints'
 ```
 
 ### Start a Tunneler
-Download the appropriate Ziti Tunneler for your operating system [here](https://github.com/hanzozt/ziti-tunnel-sdk-c/releases/latest).
+Download the appropriate Ziti Tunneler for your operating system [here](https://github.com/hanzozt/zt-tunnel-sdk-c/releases/latest).
 
 Start the tunneler, providing it with the server identity file (`httpbin.server.json`). Be sure to update the path to 
 point to your identity file as necessary. The tunneler will handle offloading traffic from the Hanzo ZT network to its 
 final destination (http://httpbin.org).
 ```
-sudo ./ziti-edge-tunnel run -i httpbin.server.json
+sudo ./zt-edge-tunnel run -i httpbin.server.json
 ```
 ## Run the Sample
 Run the sample, providing it with the client identity file (`httpbin.client.json`). Be sure to update the path to point 
@@ -71,11 +71,11 @@ to your identity file as necessary
 To clean up the network, use the following commands
 ```
 # Remove Service Policies
-ziti edge delete service-policies httpbin-binding httpbin-dialing
+zt edge delete service-policies httpbin-binding httpbin-dialing
 # Remove the Service
-ziti edge delete service httpbin
+zt edge delete service httpbin
 # Remove the configs
-ziti edge delete configs httpbin-host.v1
+zt edge delete configs httpbin-host.v1
 # Remove the identities
-ziti edge delete identities httpbin.client httpbin.server
+zt edge delete identities httpbin.client httpbin.server
 ```

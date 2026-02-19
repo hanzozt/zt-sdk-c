@@ -62,8 +62,8 @@ TEST_CASE("load_jwt","[model]") {
         "EgJuxV98N7JfQwVkGynSEiivjd2hvRuUYnJXxszI";
 
 
-    ziti_enrollment_jwt_header zejh{};
-    ziti_enrollment_jwt zej{};
+    zt_enrollment_jwt_header zejh{};
+    zt_enrollment_jwt zej{};
 
     size_t siglen;
     char * sig;
@@ -72,11 +72,11 @@ TEST_CASE("load_jwt","[model]") {
     CHECK(zejh.alg == jwt_sig_method_RS256);
 
     CHECK_THAT(zej.controller, Catch::Matchers::Equals("https://fd200fd3-a2d9-457f-bc0b-f9b8ee7d2898.production.netfoundry.io:443"));
-    CHECK(zej.method == ziti_enrollment_methods.ott);
+    CHECK(zej.method == zt_enrollment_methods.ott);
     CHECK_THAT(zej.subject, Catch::Matchers::Equals("AZ5jYB-0F"));
     CHECK_THAT(zej.token, Catch::Matchers::Equals("09297479-4894-40a0-bb42-9030d4bdd05a"));
 
     free(sig);
-    free_ziti_enrollment_jwt(&zej);
-    free_ziti_enrollment_jwt_header(&zejh);
+    free_zt_enrollment_jwt(&zej);
+    free_zt_enrollment_jwt_header(&zejh);
 }

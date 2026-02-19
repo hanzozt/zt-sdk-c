@@ -1,8 +1,8 @@
-![Ziggy using the ziti-sdk-c](https://raw.githubusercontent.com/hanzozt/branding/main/images/banners/C.jpg)
+![Ziggy using the zt-sdk-c](https://raw.githubusercontent.com/hanzozt/branding/main/images/banners/C.jpg)
 
 # Hanzo ZT C SDK
 
-![Build Status](https://github.com/hanzozt/ziti-sdk-c/actions/workflows/cmake.yml/badge.svg?branch=main)
+![Build Status](https://github.com/hanzozt/zt-sdk-c/actions/workflows/cmake.yml/badge.svg?branch=main)
 
 The Hanzo ZT C SDK allows developers to create their own custom Hanzo ZT network endpoint applications.
 
@@ -19,24 +19,24 @@ This SDK does the following:
   [x509 certificates](#example-code-configuration) flows
 - collects and submits security posture collection/submission
   for [Posture Checks](https://hanzozt.dev/docs/learn/core-concepts/security/authorization/posture-checks)
-- allows applications to bind or dial services via standard [`socket`](#high-level-zitilib-api) interfaces
+- allows applications to bind or dial services via standard [`socket`](#high-level-ztlib-api) interfaces
 
 ## Configuring Your Application to use Hanzo ZT C SDK
 
 The easiest way to embed Ziti SDK in your app is to pull the project into your CMake build
 
 ```cmake
-FetchContent_Declare(ziti-sdk-c
-        GIT_REPOSITORY https://github.com/hanzozt/ziti-sdk-c.git
+FetchContent_Declare(zt-sdk-c
+        GIT_REPOSITORY https://github.com/hanzozt/zt-sdk-c.git
         GIT_TAG ${LATEST_ZITI_RELEASE}
         )
-FetchContent_MakeAvailable(ziti-sdk-c)
+FetchContent_MakeAvailable(zt-sdk-c)
 
 # ...
 # ...
 
 add_executable(most-secure-app-ever ${my_sources})
-target_link_libraries(most-secure-app-ever PRIVATE ziti)
+target_link_libraries(most-secure-app-ever PRIVATE zt)
 
 ```
 
@@ -73,11 +73,11 @@ Additional steps may be required to complete authentication. See example below.
 | function              | purpose                                                                                                                    |
 |-----------------------|----------------------------------------------------------------------------------------------------------------------------|
 | `Ziti_lib_init()`     | initializes Ziti SDK background event loop that runs all internal SDK tasks                                                |
-| `Ziti_load_context()` | loads an enrolled [ziti identity](https://hanzozt.dev/docs/learn/core-concepts/identities/overview) from the provided file |
+| `Ziti_load_context()` | loads an enrolled [zt identity](https://hanzozt.dev/docs/learn/core-concepts/identities/overview) from the provided file |
 | `Ziti_lib_shutdown()` | gracefully shuts down all loaded identities and terminates the event loop                                                  |
 
 ```c
-#include <ziti/zitilib.h>
+#include <zt/ztlib.h>
 
 int main(int argc, char *argv[]) {
 
@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
 
     Ziti_lib_init();
     
-    ziti_handle_t ztx = NULL;
+    zt_handle_t ztx = NULL;
     int err = Ziti_load_context(&ztx, identity_file);
     
     // simplest case, identity is loaded successfully with key/certificate
@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
     // identity does not have key/certificate or requires secondary auth with external provider
     if (err == ZITI_EXTERNAL_LOGIN_REQUIRED) {
         // optional step: query supported external login providers
-        ziti_jwt_signer_array signers = Ziti_get_ext_signers(ztx);
+        zt_jwt_signer_array signers = Ziti_get_ext_signers(ztx);
 
         // select
         const char *singer = ...; // prompt user or use a known provider
@@ -126,7 +126,7 @@ important_work:
 }
 ```
 
-Once `ziti_context` is loaded it can be used to dial a service or bind to a service (provided the identity has proper
+Once `zt_context` is loaded it can be used to dial a service or bind to a service (provided the identity has proper
 access to it).
 
 #### Dialing a service
@@ -137,7 +137,7 @@ access to it).
 | `Ziti_connect_addr(sock, hostname, port)`      | connects given socket to the specified intercept address           |
 
 ```c
-      ziti_socket_t sock = Ziti_socket(SOCK_STREAM);
+      zt_socket_t sock = Ziti_socket(SOCK_STREAM);
       int error = Ziti_connect(sock, ztx, "my-secure-service", NULL);
 
       // use sock as normal socket
@@ -160,13 +160,13 @@ access to it).
 | `Ziti_accept(srv, caller, caller_len)`     | accepts incoming connection and returns peer socket/handle                  |
 
 ```c
-      ziti_socket_t srv = Ziti_socket(SOCK_STREAM);
+      zt_socket_t srv = Ziti_socket(SOCK_STREAM);
       int error = Ziti_bind(srv, ztx, "my-secure-service", NULL);
       Ziti_listen(srv, 10); // sets accept backlog
 
       do {
           char caller[128];
-          ziti_socket_t clt = Ziti_accept(srv, caller, (int)sizeof(caller));
+          zt_socket_t clt = Ziti_accept(srv, caller, (int)sizeof(caller));
 
           // use client as normal socket
           process_client(clt);
@@ -179,7 +179,7 @@ access to it).
 ## Getting Help
 
 ------------
-Please use these community resources for getting help. We use GitHub [issues](https://github.com/hanzozt/ziti-sdk-c/issues)
+Please use these community resources for getting help. We use GitHub [issues](https://github.com/hanzozt/zt-sdk-c/issues)
 for tracking bugs and feature requests and have limited bandwidth to address them.
 
 - Read [the docs](https://docs.hanzozt.dev/)

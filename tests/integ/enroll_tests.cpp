@@ -17,10 +17,10 @@
 #include "../catch2_includes.hpp"
 #include "fixtures.h"
 
-#include <ziti/ziti.h>
+#include <zt/zt.h>
 
 TEST_CASE_METHOD(LoopTestCase, "enroll-invalid-url", "[enroll][integration]") {
-    ziti_enroll_opts opts {
+    zt_enroll_opts opts {
         .url = "not a valid url",
     };
 
@@ -30,7 +30,7 @@ TEST_CASE_METHOD(LoopTestCase, "enroll-invalid-url", "[enroll][integration]") {
         std::string error;
 
     } test_ctx;
-    auto rc = ziti_enroll(&opts, loop(), [](const ziti_config *cfg, int status, const char *err_message, void *enroll_ctx){
+    auto rc = zt_enroll(&opts, loop(), [](const zt_config *cfg, int status, const char *err_message, void *enroll_ctx){
         auto tctx = (test_ctx_t*)enroll_ctx;
         tctx->called = true;
         tctx->status = status;
@@ -44,7 +44,7 @@ TEST_CASE_METHOD(LoopTestCase, "enroll-invalid-url", "[enroll][integration]") {
 }
 
 TEST_CASE_METHOD(LoopTestCase, "enroll-unknown-url", "[enroll][integration]") {
-    ziti_enroll_opts opts {
+    zt_enroll_opts opts {
             .url = "https://this.is.not.a.valid.address:18443",
     };
 
@@ -54,7 +54,7 @@ TEST_CASE_METHOD(LoopTestCase, "enroll-unknown-url", "[enroll][integration]") {
         std::string error;
 
     } test_ctx;
-    auto rc = ziti_enroll(&opts, loop(), [](const ziti_config *cfg, int status, const char *err_message, void *enroll_ctx){
+    auto rc = zt_enroll(&opts, loop(), [](const zt_config *cfg, int status, const char *err_message, void *enroll_ctx){
         auto tctx = (test_ctx_t*)enroll_ctx;
         tctx->called = true;
         tctx->status = status;
@@ -69,8 +69,8 @@ TEST_CASE_METHOD(LoopTestCase, "enroll-unknown-url", "[enroll][integration]") {
     CHECK(test_ctx.error == uv_strerror(UV_EAI_NONAME));
 }
 
-TEST_CASE_METHOD(LoopTestCase, "enroll-nonziti-url", "[enroll][integration]") {
-    ziti_enroll_opts opts {
+TEST_CASE_METHOD(LoopTestCase, "enroll-nonzt-url", "[enroll][integration]") {
+    zt_enroll_opts opts {
             .url = "https://google.com",
     };
 
@@ -80,7 +80,7 @@ TEST_CASE_METHOD(LoopTestCase, "enroll-nonziti-url", "[enroll][integration]") {
         std::string error;
 
     } test_ctx;
-    auto rc = ziti_enroll(&opts, loop(), [](const ziti_config *cfg, int status, const char *err_message, void *enroll_ctx){
+    auto rc = zt_enroll(&opts, loop(), [](const zt_config *cfg, int status, const char *err_message, void *enroll_ctx){
         auto tctx = (test_ctx_t*)enroll_ctx;
         tctx->called = true;
         tctx->status = status;

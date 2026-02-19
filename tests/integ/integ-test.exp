@@ -1,14 +1,14 @@
 #!expect
 
-set ziti $env(ZITI_CLI)
-puts "ziti = $ziti"
+set zt $env(ZITI_CLI)
+puts "zt = $zt"
 
 set tester $env(TEST_EXE)
 puts "test driver = $tester"
 
 puts "Starting Ziti Quickstart"
 puts "========================"
-spawn $ziti edge quickstart --home $env(QUICKSTART_HOME)
+spawn $zt edge quickstart --home $env(QUICKSTART_HOME)
 set qs_id $spawn_id
 
 expect {

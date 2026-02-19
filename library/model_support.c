@@ -17,7 +17,7 @@
 #include <string.h>
 #include <json-c/json.h>
 
-#include <ziti/model_support.h>
+#include <zt/model_support.h>
 #include <buffer.h>
 #include <utils.h>
 

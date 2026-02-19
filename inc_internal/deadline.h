@@ -19,7 +19,7 @@
 
 #include <tlsuv/queue.h>
 #include <stdint.h>
-#include "ziti/ziti_log.h"
+#include "zt/zt_log.h"
 
 typedef struct deadline_s deadline_t;
 typedef LIST_HEAD(deadline_list, deadline_s) deadline_list_t;

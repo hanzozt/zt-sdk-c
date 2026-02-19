@@ -15,7 +15,7 @@
 #ifndef ZITI_SDK_AUTH_METHOD_H
 #define ZITI_SDK_AUTH_METHOD_H
 
-#include "ziti_ctrl.h"
+#include "zt_ctrl.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,9 +26,9 @@ enum AuthenticationMethod {
     OIDC
 };
 
-static const ziti_auth_query_mfa ZITI_MFA = {
-        .type_id = ziti_auth_query_type_MFA,
-        .provider = "ziti",
+static const zt_auth_query_mfa ZITI_MFA = {
+        .type_id = zt_auth_query_type_MFA,
+        .provider = "zt",
 };
 
 typedef enum {
@@ -39,27 +39,27 @@ typedef enum {
     ZitiAuthStateFullyAuthenticated,
 
     ZitiAuthImpossibleToAuthenticate,
-} ziti_auth_state;
+} zt_auth_state;
 
-typedef struct ziti_ctx *ziti_context;
-typedef struct ziti_auth_method_s ziti_auth_method_t;
-typedef void (*auth_state_cb)(void *ctx, ziti_auth_state, const void *data);
+typedef struct zt_ctx *zt_context;
+typedef struct zt_auth_method_s zt_auth_method_t;
+typedef void (*auth_state_cb)(void *ctx, zt_auth_state, const void *data);
 typedef void (*auth_mfa_cb)(void *ctx, int status);
 
-struct ziti_auth_method_s {
+struct zt_auth_method_s {
     enum AuthenticationMethod kind;
-    int (*set_ext_jwt)(ziti_auth_method_t *self, const char *token);
-    int (*set_endpoint)(ziti_auth_method_t *self, const api_path *api);
-    int (*start)(ziti_auth_method_t *self, auth_state_cb cb, void *ctx);
-    int (*force_refresh)(ziti_auth_method_t *self);
-    const struct timeval* (*expiration)(ziti_auth_method_t *self);
-    int (*submit_mfa)(ziti_auth_method_t *self, const char *code, auth_mfa_cb);
-    int (*stop)(ziti_auth_method_t *self);
-    void (*free)(ziti_auth_method_t *self);
+    int (*set_ext_jwt)(zt_auth_method_t *self, const char *token);
+    int (*set_endpoint)(zt_auth_method_t *self, const api_path *api);
+    int (*start)(zt_auth_method_t *self, auth_state_cb cb, void *ctx);
+    int (*force_refresh)(zt_auth_method_t *self);
+    const struct timeval* (*expiration)(zt_auth_method_t *self);
+    int (*submit_mfa)(zt_auth_method_t *self, const char *code, auth_mfa_cb);
+    int (*stop)(zt_auth_method_t *self);
+    void (*free)(zt_auth_method_t *self);
 };
 
-ziti_auth_method_t *new_legacy_auth(ziti_controller *ctrl);
-ziti_auth_method_t *new_oidc_auth(uv_loop_t *l, const api_path *api, tls_context *tls);
+zt_auth_method_t *new_legacy_auth(zt_controller *ctrl);
+zt_auth_method_t *new_oidc_auth(uv_loop_t *l, const api_path *api, tls_context *tls);
 
 #ifdef __cplusplus
 }

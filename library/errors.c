@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "ziti/errors.h"
+#include "zt/errors.h"
 
 #define ZITI_ERRORS(XX) \
     XX(ZITI_OK, "OK") \
@@ -31,8 +31,8 @@
     XX(ZITI_INVALID_CONFIG, "configuration is invalid")  \
     XX(ZITI_AUTHENTICATION_FAILED, "failed to authenticate") \
     XX(ZITI_NOT_AUTHORIZED, "not authorized") \
-    XX(ZITI_CONTROLLER_UNAVAILABLE, "ziti controller is not available") \
-    XX(ZITI_GATEWAY_UNAVAILABLE, "ziti edge router is not available") \
+    XX(ZITI_CONTROLLER_UNAVAILABLE, "zt controller is not available") \
+    XX(ZITI_GATEWAY_UNAVAILABLE, "zt edge router is not available") \
     XX(ZITI_SERVICE_UNAVAILABLE, "service not available") \
     XX(ZITI_EOF, "end of data") \
     XX(ZITI_TIMEOUT, "operation did not complete in time") \
@@ -45,7 +45,7 @@
     XX(ZITI_MFA_INVALID_TOKEN, "the token provided was invalid") \
     XX(ZITI_MFA_NOT_ENROLLED, "the current identity has not completed MFA enrollment") \
     XX(ZITI_NOT_FOUND, "entity no longer exists or is no longer accessible") \
-    XX(ZITI_DISABLED, "ziti context is disabled") \
+    XX(ZITI_DISABLED, "zt context is disabled") \
     XX(ZITI_PARTIALLY_AUTHENTICATED, "api session is partially authenticated, waiting for auth query resolution")               \
     XX(ZITI_INVALID_AUTHENTICATOR_TYPE, "the authenticator could not be extended as it is the incorrect type")                  \
     XX(ZITI_INVALID_AUTHENTICATOR_CERT, "the authenticator could not be extended as the current client certificate does not match") \
@@ -62,7 +62,7 @@
 
 #define ERR_NAME(e, s) case e: return s;
 
-const char *ziti_errorstr(int err) {
+const char *zt_errorstr(int err) {
     switch (err) {
         ZITI_ERRORS(ERR_NAME)
 

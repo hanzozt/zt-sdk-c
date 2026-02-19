@@ -14,7 +14,7 @@
 
 #include "catch2_includes.hpp"
 
-#include <ziti/model_collections.h>
+#include <zt/model_collections.h>
 #include <cstring>
 
 

@@ -175,7 +175,7 @@ struct  Ziti__EdgeClient__Pb__ServicePostureStateRequest
   char **serviceids;
 };
 #define ZITI__EDGE_CLIENT__PB__SERVICE_POSTURE_STATE_REQUEST__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&ziti__edge_client__pb__service_posture_state_request__descriptor) \
+ { PROTOBUF_C_MESSAGE_INIT (&zt__edge_client__pb__service_posture_state_request__descriptor) \
 , 0,NULL }
 
 
@@ -186,7 +186,7 @@ struct  Ziti__EdgeClient__Pb__ServicePostureStateResponse__StatesEntry
   Ziti__EdgeClient__Pb__ServicePostureState *value;
 };
 #define ZITI__EDGE_CLIENT__PB__SERVICE_POSTURE_STATE_RESPONSE__STATES_ENTRY__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&ziti__edge_client__pb__service_posture_state_response__states_entry__descriptor) \
+ { PROTOBUF_C_MESSAGE_INIT (&zt__edge_client__pb__service_posture_state_response__states_entry__descriptor) \
 , (char *)protobuf_c_empty_string, NULL }
 
 
@@ -197,7 +197,7 @@ struct  Ziti__EdgeClient__Pb__ServicePostureStateResponse
   Ziti__EdgeClient__Pb__ServicePostureStateResponse__StatesEntry **states;
 };
 #define ZITI__EDGE_CLIENT__PB__SERVICE_POSTURE_STATE_RESPONSE__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&ziti__edge_client__pb__service_posture_state_response__descriptor) \
+ { PROTOBUF_C_MESSAGE_INIT (&zt__edge_client__pb__service_posture_state_response__descriptor) \
 , 0,NULL }
 
 
@@ -208,7 +208,7 @@ struct  Ziti__EdgeClient__Pb__ServicePostureState__PoliciesEntry
   Ziti__EdgeClient__Pb__Policy *value;
 };
 #define ZITI__EDGE_CLIENT__PB__SERVICE_POSTURE_STATE__POLICIES_ENTRY__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&ziti__edge_client__pb__service_posture_state__policies_entry__descriptor) \
+ { PROTOBUF_C_MESSAGE_INIT (&zt__edge_client__pb__service_posture_state__policies_entry__descriptor) \
 , (char *)protobuf_c_empty_string, NULL }
 
 
@@ -224,7 +224,7 @@ struct  Ziti__EdgeClient__Pb__ServicePostureState
   Ziti__EdgeClient__Pb__ServicePostureState__PoliciesEntry **policies;
 };
 #define ZITI__EDGE_CLIENT__PB__SERVICE_POSTURE_STATE__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&ziti__edge_client__pb__service_posture_state__descriptor) \
+ { PROTOBUF_C_MESSAGE_INIT (&zt__edge_client__pb__service_posture_state__descriptor) \
 , 0, 0,NULL, 0,NULL, 0,NULL }
 
 
@@ -235,7 +235,7 @@ struct  Ziti__EdgeClient__Pb__Policy__PostureQueriesEntry
   Ziti__EdgeClient__Pb__PostureQuery *value;
 };
 #define ZITI__EDGE_CLIENT__PB__POLICY__POSTURE_QUERIES_ENTRY__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&ziti__edge_client__pb__policy__posture_queries_entry__descriptor) \
+ { PROTOBUF_C_MESSAGE_INIT (&zt__edge_client__pb__policy__posture_queries_entry__descriptor) \
 , (char *)protobuf_c_empty_string, NULL }
 
 
@@ -252,7 +252,7 @@ struct  Ziti__EdgeClient__Pb__Policy
   Ziti__EdgeClient__Pb__Policy__PostureQueriesEntry **posturequeries;
 };
 #define ZITI__EDGE_CLIENT__PB__POLICY__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&ziti__edge_client__pb__policy__descriptor) \
+ { PROTOBUF_C_MESSAGE_INIT (&zt__edge_client__pb__policy__descriptor) \
 , (char *)protobuf_c_empty_string, 0, 0,NULL, 0,NULL, 0,NULL }
 
 
@@ -264,7 +264,7 @@ struct  Ziti__EdgeClient__Pb__PostureQuery__Processes
   Ziti__EdgeClient__Pb__PostureQuery__Process **processes;
 };
 #define ZITI__EDGE_CLIENT__PB__POSTURE_QUERY__PROCESSES__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&ziti__edge_client__pb__posture_query__processes__descriptor) \
+ { PROTOBUF_C_MESSAGE_INIT (&zt__edge_client__pb__posture_query__processes__descriptor) \
 , (char *)protobuf_c_empty_string, 0,NULL }
 
 
@@ -275,7 +275,7 @@ struct  Ziti__EdgeClient__Pb__PostureQuery__Process
   char *path;
 };
 #define ZITI__EDGE_CLIENT__PB__POSTURE_QUERY__PROCESS__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&ziti__edge_client__pb__posture_query__process__descriptor) \
+ { PROTOBUF_C_MESSAGE_INIT (&zt__edge_client__pb__posture_query__process__descriptor) \
 , (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string }
 
 
@@ -294,7 +294,7 @@ struct  Ziti__EdgeClient__Pb__PostureQuery
   Ziti__EdgeClient__Pb__PostureQuery__Processes *processes;
 };
 #define ZITI__EDGE_CLIENT__PB__POSTURE_QUERY__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&ziti__edge_client__pb__posture_query__descriptor) \
+ { PROTOBUF_C_MESSAGE_INIT (&zt__edge_client__pb__posture_query__descriptor) \
 , (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, NULL, 0, 0, 0, 0, 0, NULL }
 
 
@@ -305,7 +305,7 @@ struct  Ziti__EdgeClient__Pb__PostureResponses
   Ziti__EdgeClient__Pb__PostureResponse **responses;
 };
 #define ZITI__EDGE_CLIENT__PB__POSTURE_RESPONSES__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&ziti__edge_client__pb__posture_responses__descriptor) \
+ { PROTOBUF_C_MESSAGE_INIT (&zt__edge_client__pb__posture_responses__descriptor) \
 , 0,NULL }
 
 
@@ -316,7 +316,7 @@ struct  Ziti__EdgeClient__Pb__PostureResponse__TotpToken
   char *code;
 };
 #define ZITI__EDGE_CLIENT__PB__POSTURE_RESPONSE__TOTP_TOKEN__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&ziti__edge_client__pb__posture_response__totp_token__descriptor) \
+ { PROTOBUF_C_MESSAGE_INIT (&zt__edge_client__pb__posture_response__totp_token__descriptor) \
 , (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string }
 
 
@@ -327,7 +327,7 @@ struct  Ziti__EdgeClient__Pb__PostureResponse__Macs
   char **addresses;
 };
 #define ZITI__EDGE_CLIENT__PB__POSTURE_RESPONSE__MACS__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&ziti__edge_client__pb__posture_response__macs__descriptor) \
+ { PROTOBUF_C_MESSAGE_INIT (&zt__edge_client__pb__posture_response__macs__descriptor) \
 , 0,NULL }
 
 
@@ -339,7 +339,7 @@ struct  Ziti__EdgeClient__Pb__PostureResponse__OperatingSystem
   char *build;
 };
 #define ZITI__EDGE_CLIENT__PB__POSTURE_RESPONSE__OPERATING_SYSTEM__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&ziti__edge_client__pb__posture_response__operating_system__descriptor) \
+ { PROTOBUF_C_MESSAGE_INIT (&zt__edge_client__pb__posture_response__operating_system__descriptor) \
 , (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string }
 
 
@@ -349,7 +349,7 @@ struct  Ziti__EdgeClient__Pb__PostureResponse__Domain
   char *name;
 };
 #define ZITI__EDGE_CLIENT__PB__POSTURE_RESPONSE__DOMAIN__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&ziti__edge_client__pb__posture_response__domain__descriptor) \
+ { PROTOBUF_C_MESSAGE_INIT (&zt__edge_client__pb__posture_response__domain__descriptor) \
 , (char *)protobuf_c_empty_string }
 
 
@@ -363,7 +363,7 @@ struct  Ziti__EdgeClient__Pb__PostureResponse__Process
   char **signerfingerprints;
 };
 #define ZITI__EDGE_CLIENT__PB__POSTURE_RESPONSE__PROCESS__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&ziti__edge_client__pb__posture_response__process__descriptor) \
+ { PROTOBUF_C_MESSAGE_INIT (&zt__edge_client__pb__posture_response__process__descriptor) \
 , (char *)protobuf_c_empty_string, 0, (char *)protobuf_c_empty_string, 0,NULL }
 
 
@@ -374,7 +374,7 @@ struct  Ziti__EdgeClient__Pb__PostureResponse__ProcessList
   Ziti__EdgeClient__Pb__PostureResponse__Process **processes;
 };
 #define ZITI__EDGE_CLIENT__PB__POSTURE_RESPONSE__PROCESS_LIST__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&ziti__edge_client__pb__posture_response__process_list__descriptor) \
+ { PROTOBUF_C_MESSAGE_INIT (&zt__edge_client__pb__posture_response__process_list__descriptor) \
 , 0,NULL }
 
 
@@ -384,7 +384,7 @@ struct  Ziti__EdgeClient__Pb__PostureResponse__Woken
   Google__Protobuf__Timestamp *time;
 };
 #define ZITI__EDGE_CLIENT__PB__POSTURE_RESPONSE__WOKEN__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&ziti__edge_client__pb__posture_response__woken__descriptor) \
+ { PROTOBUF_C_MESSAGE_INIT (&zt__edge_client__pb__posture_response__woken__descriptor) \
 , NULL }
 
 
@@ -394,7 +394,7 @@ struct  Ziti__EdgeClient__Pb__PostureResponse__Unlocked
   Google__Protobuf__Timestamp *time;
 };
 #define ZITI__EDGE_CLIENT__PB__POSTURE_RESPONSE__UNLOCKED__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&ziti__edge_client__pb__posture_response__unlocked__descriptor) \
+ { PROTOBUF_C_MESSAGE_INIT (&zt__edge_client__pb__posture_response__unlocked__descriptor) \
 , NULL }
 
 
@@ -409,7 +409,7 @@ struct  Ziti__EdgeClient__Pb__PostureResponse__SdkInfo
   char *version;
 };
 #define ZITI__EDGE_CLIENT__PB__POSTURE_RESPONSE__SDK_INFO__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&ziti__edge_client__pb__posture_response__sdk_info__descriptor) \
+ { PROTOBUF_C_MESSAGE_INIT (&zt__edge_client__pb__posture_response__sdk_info__descriptor) \
 , (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string }
 
 
@@ -442,183 +442,183 @@ struct  Ziti__EdgeClient__Pb__PostureResponse
   };
 };
 #define ZITI__EDGE_CLIENT__PB__POSTURE_RESPONSE__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&ziti__edge_client__pb__posture_response__descriptor) \
+ { PROTOBUF_C_MESSAGE_INIT (&zt__edge_client__pb__posture_response__descriptor) \
 , ZITI__EDGE_CLIENT__PB__POSTURE_RESPONSE__TYPE__NOT_SET, {0} }
 
 
 /* Ziti__EdgeClient__Pb__ServicePostureStateRequest methods */
-void   ziti__edge_client__pb__service_posture_state_request__init
+void   zt__edge_client__pb__service_posture_state_request__init
                      (Ziti__EdgeClient__Pb__ServicePostureStateRequest         *message);
-size_t ziti__edge_client__pb__service_posture_state_request__get_packed_size
+size_t zt__edge_client__pb__service_posture_state_request__get_packed_size
                      (const Ziti__EdgeClient__Pb__ServicePostureStateRequest   *message);
-size_t ziti__edge_client__pb__service_posture_state_request__pack
+size_t zt__edge_client__pb__service_posture_state_request__pack
                      (const Ziti__EdgeClient__Pb__ServicePostureStateRequest   *message,
                       uint8_t             *out);
-size_t ziti__edge_client__pb__service_posture_state_request__pack_to_buffer
+size_t zt__edge_client__pb__service_posture_state_request__pack_to_buffer
                      (const Ziti__EdgeClient__Pb__ServicePostureStateRequest   *message,
                       ProtobufCBuffer     *buffer);
 Ziti__EdgeClient__Pb__ServicePostureStateRequest *
-       ziti__edge_client__pb__service_posture_state_request__unpack
+       zt__edge_client__pb__service_posture_state_request__unpack
                      (ProtobufCAllocator  *allocator,
                       size_t               len,
                       const uint8_t       *data);
-void   ziti__edge_client__pb__service_posture_state_request__free_unpacked
+void   zt__edge_client__pb__service_posture_state_request__free_unpacked
                      (Ziti__EdgeClient__Pb__ServicePostureStateRequest *message,
                       ProtobufCAllocator *allocator);
 /* Ziti__EdgeClient__Pb__ServicePostureStateResponse__StatesEntry methods */
-void   ziti__edge_client__pb__service_posture_state_response__states_entry__init
+void   zt__edge_client__pb__service_posture_state_response__states_entry__init
                      (Ziti__EdgeClient__Pb__ServicePostureStateResponse__StatesEntry         *message);
 /* Ziti__EdgeClient__Pb__ServicePostureStateResponse methods */
-void   ziti__edge_client__pb__service_posture_state_response__init
+void   zt__edge_client__pb__service_posture_state_response__init
                      (Ziti__EdgeClient__Pb__ServicePostureStateResponse         *message);
-size_t ziti__edge_client__pb__service_posture_state_response__get_packed_size
+size_t zt__edge_client__pb__service_posture_state_response__get_packed_size
                      (const Ziti__EdgeClient__Pb__ServicePostureStateResponse   *message);
-size_t ziti__edge_client__pb__service_posture_state_response__pack
+size_t zt__edge_client__pb__service_posture_state_response__pack
                      (const Ziti__EdgeClient__Pb__ServicePostureStateResponse   *message,
                       uint8_t             *out);
-size_t ziti__edge_client__pb__service_posture_state_response__pack_to_buffer
+size_t zt__edge_client__pb__service_posture_state_response__pack_to_buffer
                      (const Ziti__EdgeClient__Pb__ServicePostureStateResponse   *message,
                       ProtobufCBuffer     *buffer);
 Ziti__EdgeClient__Pb__ServicePostureStateResponse *
-       ziti__edge_client__pb__service_posture_state_response__unpack
+       zt__edge_client__pb__service_posture_state_response__unpack
                      (ProtobufCAllocator  *allocator,
                       size_t               len,
                       const uint8_t       *data);
-void   ziti__edge_client__pb__service_posture_state_response__free_unpacked
+void   zt__edge_client__pb__service_posture_state_response__free_unpacked
                      (Ziti__EdgeClient__Pb__ServicePostureStateResponse *message,
                       ProtobufCAllocator *allocator);
 /* Ziti__EdgeClient__Pb__ServicePostureState__PoliciesEntry methods */
-void   ziti__edge_client__pb__service_posture_state__policies_entry__init
+void   zt__edge_client__pb__service_posture_state__policies_entry__init
                      (Ziti__EdgeClient__Pb__ServicePostureState__PoliciesEntry         *message);
 /* Ziti__EdgeClient__Pb__ServicePostureState methods */
-void   ziti__edge_client__pb__service_posture_state__init
+void   zt__edge_client__pb__service_posture_state__init
                      (Ziti__EdgeClient__Pb__ServicePostureState         *message);
-size_t ziti__edge_client__pb__service_posture_state__get_packed_size
+size_t zt__edge_client__pb__service_posture_state__get_packed_size
                      (const Ziti__EdgeClient__Pb__ServicePostureState   *message);
-size_t ziti__edge_client__pb__service_posture_state__pack
+size_t zt__edge_client__pb__service_posture_state__pack
                      (const Ziti__EdgeClient__Pb__ServicePostureState   *message,
                       uint8_t             *out);
-size_t ziti__edge_client__pb__service_posture_state__pack_to_buffer
+size_t zt__edge_client__pb__service_posture_state__pack_to_buffer
                      (const Ziti__EdgeClient__Pb__ServicePostureState   *message,
                       ProtobufCBuffer     *buffer);
 Ziti__EdgeClient__Pb__ServicePostureState *
-       ziti__edge_client__pb__service_posture_state__unpack
+       zt__edge_client__pb__service_posture_state__unpack
                      (ProtobufCAllocator  *allocator,
                       size_t               len,
                       const uint8_t       *data);
-void   ziti__edge_client__pb__service_posture_state__free_unpacked
+void   zt__edge_client__pb__service_posture_state__free_unpacked
                      (Ziti__EdgeClient__Pb__ServicePostureState *message,
                       ProtobufCAllocator *allocator);
 /* Ziti__EdgeClient__Pb__Policy__PostureQueriesEntry methods */
-void   ziti__edge_client__pb__policy__posture_queries_entry__init
+void   zt__edge_client__pb__policy__posture_queries_entry__init
                      (Ziti__EdgeClient__Pb__Policy__PostureQueriesEntry         *message);
 /* Ziti__EdgeClient__Pb__Policy methods */
-void   ziti__edge_client__pb__policy__init
+void   zt__edge_client__pb__policy__init
                      (Ziti__EdgeClient__Pb__Policy         *message);
-size_t ziti__edge_client__pb__policy__get_packed_size
+size_t zt__edge_client__pb__policy__get_packed_size
                      (const Ziti__EdgeClient__Pb__Policy   *message);
-size_t ziti__edge_client__pb__policy__pack
+size_t zt__edge_client__pb__policy__pack
                      (const Ziti__EdgeClient__Pb__Policy   *message,
                       uint8_t             *out);
-size_t ziti__edge_client__pb__policy__pack_to_buffer
+size_t zt__edge_client__pb__policy__pack_to_buffer
                      (const Ziti__EdgeClient__Pb__Policy   *message,
                       ProtobufCBuffer     *buffer);
 Ziti__EdgeClient__Pb__Policy *
-       ziti__edge_client__pb__policy__unpack
+       zt__edge_client__pb__policy__unpack
                      (ProtobufCAllocator  *allocator,
                       size_t               len,
                       const uint8_t       *data);
-void   ziti__edge_client__pb__policy__free_unpacked
+void   zt__edge_client__pb__policy__free_unpacked
                      (Ziti__EdgeClient__Pb__Policy *message,
                       ProtobufCAllocator *allocator);
 /* Ziti__EdgeClient__Pb__PostureQuery__Processes methods */
-void   ziti__edge_client__pb__posture_query__processes__init
+void   zt__edge_client__pb__posture_query__processes__init
                      (Ziti__EdgeClient__Pb__PostureQuery__Processes         *message);
 /* Ziti__EdgeClient__Pb__PostureQuery__Process methods */
-void   ziti__edge_client__pb__posture_query__process__init
+void   zt__edge_client__pb__posture_query__process__init
                      (Ziti__EdgeClient__Pb__PostureQuery__Process         *message);
 /* Ziti__EdgeClient__Pb__PostureQuery methods */
-void   ziti__edge_client__pb__posture_query__init
+void   zt__edge_client__pb__posture_query__init
                      (Ziti__EdgeClient__Pb__PostureQuery         *message);
-size_t ziti__edge_client__pb__posture_query__get_packed_size
+size_t zt__edge_client__pb__posture_query__get_packed_size
                      (const Ziti__EdgeClient__Pb__PostureQuery   *message);
-size_t ziti__edge_client__pb__posture_query__pack
+size_t zt__edge_client__pb__posture_query__pack
                      (const Ziti__EdgeClient__Pb__PostureQuery   *message,
                       uint8_t             *out);
-size_t ziti__edge_client__pb__posture_query__pack_to_buffer
+size_t zt__edge_client__pb__posture_query__pack_to_buffer
                      (const Ziti__EdgeClient__Pb__PostureQuery   *message,
                       ProtobufCBuffer     *buffer);
 Ziti__EdgeClient__Pb__PostureQuery *
-       ziti__edge_client__pb__posture_query__unpack
+       zt__edge_client__pb__posture_query__unpack
                      (ProtobufCAllocator  *allocator,
                       size_t               len,
                       const uint8_t       *data);
-void   ziti__edge_client__pb__posture_query__free_unpacked
+void   zt__edge_client__pb__posture_query__free_unpacked
                      (Ziti__EdgeClient__Pb__PostureQuery *message,
                       ProtobufCAllocator *allocator);
 /* Ziti__EdgeClient__Pb__PostureResponses methods */
-void   ziti__edge_client__pb__posture_responses__init
+void   zt__edge_client__pb__posture_responses__init
                      (Ziti__EdgeClient__Pb__PostureResponses         *message);
-size_t ziti__edge_client__pb__posture_responses__get_packed_size
+size_t zt__edge_client__pb__posture_responses__get_packed_size
                      (const Ziti__EdgeClient__Pb__PostureResponses   *message);
-size_t ziti__edge_client__pb__posture_responses__pack
+size_t zt__edge_client__pb__posture_responses__pack
                      (const Ziti__EdgeClient__Pb__PostureResponses   *message,
                       uint8_t             *out);
-size_t ziti__edge_client__pb__posture_responses__pack_to_buffer
+size_t zt__edge_client__pb__posture_responses__pack_to_buffer
                      (const Ziti__EdgeClient__Pb__PostureResponses   *message,
                       ProtobufCBuffer     *buffer);
 Ziti__EdgeClient__Pb__PostureResponses *
-       ziti__edge_client__pb__posture_responses__unpack
+       zt__edge_client__pb__posture_responses__unpack
                      (ProtobufCAllocator  *allocator,
                       size_t               len,
                       const uint8_t       *data);
-void   ziti__edge_client__pb__posture_responses__free_unpacked
+void   zt__edge_client__pb__posture_responses__free_unpacked
                      (Ziti__EdgeClient__Pb__PostureResponses *message,
                       ProtobufCAllocator *allocator);
 /* Ziti__EdgeClient__Pb__PostureResponse__TotpToken methods */
-void   ziti__edge_client__pb__posture_response__totp_token__init
+void   zt__edge_client__pb__posture_response__totp_token__init
                      (Ziti__EdgeClient__Pb__PostureResponse__TotpToken         *message);
 /* Ziti__EdgeClient__Pb__PostureResponse__Macs methods */
-void   ziti__edge_client__pb__posture_response__macs__init
+void   zt__edge_client__pb__posture_response__macs__init
                      (Ziti__EdgeClient__Pb__PostureResponse__Macs         *message);
 /* Ziti__EdgeClient__Pb__PostureResponse__OperatingSystem methods */
-void   ziti__edge_client__pb__posture_response__operating_system__init
+void   zt__edge_client__pb__posture_response__operating_system__init
                      (Ziti__EdgeClient__Pb__PostureResponse__OperatingSystem         *message);
 /* Ziti__EdgeClient__Pb__PostureResponse__Domain methods */
-void   ziti__edge_client__pb__posture_response__domain__init
+void   zt__edge_client__pb__posture_response__domain__init
                      (Ziti__EdgeClient__Pb__PostureResponse__Domain         *message);
 /* Ziti__EdgeClient__Pb__PostureResponse__Process methods */
-void   ziti__edge_client__pb__posture_response__process__init
+void   zt__edge_client__pb__posture_response__process__init
                      (Ziti__EdgeClient__Pb__PostureResponse__Process         *message);
 /* Ziti__EdgeClient__Pb__PostureResponse__ProcessList methods */
-void   ziti__edge_client__pb__posture_response__process_list__init
+void   zt__edge_client__pb__posture_response__process_list__init
                      (Ziti__EdgeClient__Pb__PostureResponse__ProcessList         *message);
 /* Ziti__EdgeClient__Pb__PostureResponse__Woken methods */
-void   ziti__edge_client__pb__posture_response__woken__init
+void   zt__edge_client__pb__posture_response__woken__init
                      (Ziti__EdgeClient__Pb__PostureResponse__Woken         *message);
 /* Ziti__EdgeClient__Pb__PostureResponse__Unlocked methods */
-void   ziti__edge_client__pb__posture_response__unlocked__init
+void   zt__edge_client__pb__posture_response__unlocked__init
                      (Ziti__EdgeClient__Pb__PostureResponse__Unlocked         *message);
 /* Ziti__EdgeClient__Pb__PostureResponse__SdkInfo methods */
-void   ziti__edge_client__pb__posture_response__sdk_info__init
+void   zt__edge_client__pb__posture_response__sdk_info__init
                      (Ziti__EdgeClient__Pb__PostureResponse__SdkInfo         *message);
 /* Ziti__EdgeClient__Pb__PostureResponse methods */
-void   ziti__edge_client__pb__posture_response__init
+void   zt__edge_client__pb__posture_response__init
                      (Ziti__EdgeClient__Pb__PostureResponse         *message);
-size_t ziti__edge_client__pb__posture_response__get_packed_size
+size_t zt__edge_client__pb__posture_response__get_packed_size
                      (const Ziti__EdgeClient__Pb__PostureResponse   *message);
-size_t ziti__edge_client__pb__posture_response__pack
+size_t zt__edge_client__pb__posture_response__pack
                      (const Ziti__EdgeClient__Pb__PostureResponse   *message,
                       uint8_t             *out);
-size_t ziti__edge_client__pb__posture_response__pack_to_buffer
+size_t zt__edge_client__pb__posture_response__pack_to_buffer
                      (const Ziti__EdgeClient__Pb__PostureResponse   *message,
                       ProtobufCBuffer     *buffer);
 Ziti__EdgeClient__Pb__PostureResponse *
-       ziti__edge_client__pb__posture_response__unpack
+       zt__edge_client__pb__posture_response__unpack
                      (ProtobufCAllocator  *allocator,
                       size_t               len,
                       const uint8_t       *data);
-void   ziti__edge_client__pb__posture_response__free_unpacked
+void   zt__edge_client__pb__posture_response__free_unpacked
                      (Ziti__EdgeClient__Pb__PostureResponse *message,
                       ProtobufCAllocator *allocator);
 /* --- per-message closures --- */
@@ -692,32 +692,32 @@ typedef void (*Ziti__EdgeClient__Pb__PostureResponse_Closure)
 
 /* --- descriptors --- */
 
-extern const ProtobufCEnumDescriptor    ziti__edge_client__pb__content_type__descriptor;
-extern const ProtobufCEnumDescriptor    ziti__edge_client__pb__header_id__descriptor;
-extern const ProtobufCEnumDescriptor    ziti__edge_client__pb__error__descriptor;
-extern const ProtobufCEnumDescriptor    ziti__edge_client__pb__precedence_value__descriptor;
-extern const ProtobufCEnumDescriptor    ziti__edge_client__pb__flag__descriptor;
-extern const ProtobufCMessageDescriptor ziti__edge_client__pb__service_posture_state_request__descriptor;
-extern const ProtobufCMessageDescriptor ziti__edge_client__pb__service_posture_state_response__descriptor;
-extern const ProtobufCMessageDescriptor ziti__edge_client__pb__service_posture_state_response__states_entry__descriptor;
-extern const ProtobufCMessageDescriptor ziti__edge_client__pb__service_posture_state__descriptor;
-extern const ProtobufCMessageDescriptor ziti__edge_client__pb__service_posture_state__policies_entry__descriptor;
-extern const ProtobufCMessageDescriptor ziti__edge_client__pb__policy__descriptor;
-extern const ProtobufCMessageDescriptor ziti__edge_client__pb__policy__posture_queries_entry__descriptor;
-extern const ProtobufCMessageDescriptor ziti__edge_client__pb__posture_query__descriptor;
-extern const ProtobufCMessageDescriptor ziti__edge_client__pb__posture_query__processes__descriptor;
-extern const ProtobufCMessageDescriptor ziti__edge_client__pb__posture_query__process__descriptor;
-extern const ProtobufCMessageDescriptor ziti__edge_client__pb__posture_responses__descriptor;
-extern const ProtobufCMessageDescriptor ziti__edge_client__pb__posture_response__descriptor;
-extern const ProtobufCMessageDescriptor ziti__edge_client__pb__posture_response__totp_token__descriptor;
-extern const ProtobufCMessageDescriptor ziti__edge_client__pb__posture_response__macs__descriptor;
-extern const ProtobufCMessageDescriptor ziti__edge_client__pb__posture_response__operating_system__descriptor;
-extern const ProtobufCMessageDescriptor ziti__edge_client__pb__posture_response__domain__descriptor;
-extern const ProtobufCMessageDescriptor ziti__edge_client__pb__posture_response__process__descriptor;
-extern const ProtobufCMessageDescriptor ziti__edge_client__pb__posture_response__process_list__descriptor;
-extern const ProtobufCMessageDescriptor ziti__edge_client__pb__posture_response__woken__descriptor;
-extern const ProtobufCMessageDescriptor ziti__edge_client__pb__posture_response__unlocked__descriptor;
-extern const ProtobufCMessageDescriptor ziti__edge_client__pb__posture_response__sdk_info__descriptor;
+extern const ProtobufCEnumDescriptor    zt__edge_client__pb__content_type__descriptor;
+extern const ProtobufCEnumDescriptor    zt__edge_client__pb__header_id__descriptor;
+extern const ProtobufCEnumDescriptor    zt__edge_client__pb__error__descriptor;
+extern const ProtobufCEnumDescriptor    zt__edge_client__pb__precedence_value__descriptor;
+extern const ProtobufCEnumDescriptor    zt__edge_client__pb__flag__descriptor;
+extern const ProtobufCMessageDescriptor zt__edge_client__pb__service_posture_state_request__descriptor;
+extern const ProtobufCMessageDescriptor zt__edge_client__pb__service_posture_state_response__descriptor;
+extern const ProtobufCMessageDescriptor zt__edge_client__pb__service_posture_state_response__states_entry__descriptor;
+extern const ProtobufCMessageDescriptor zt__edge_client__pb__service_posture_state__descriptor;
+extern const ProtobufCMessageDescriptor zt__edge_client__pb__service_posture_state__policies_entry__descriptor;
+extern const ProtobufCMessageDescriptor zt__edge_client__pb__policy__descriptor;
+extern const ProtobufCMessageDescriptor zt__edge_client__pb__policy__posture_queries_entry__descriptor;
+extern const ProtobufCMessageDescriptor zt__edge_client__pb__posture_query__descriptor;
+extern const ProtobufCMessageDescriptor zt__edge_client__pb__posture_query__processes__descriptor;
+extern const ProtobufCMessageDescriptor zt__edge_client__pb__posture_query__process__descriptor;
+extern const ProtobufCMessageDescriptor zt__edge_client__pb__posture_responses__descriptor;
+extern const ProtobufCMessageDescriptor zt__edge_client__pb__posture_response__descriptor;
+extern const ProtobufCMessageDescriptor zt__edge_client__pb__posture_response__totp_token__descriptor;
+extern const ProtobufCMessageDescriptor zt__edge_client__pb__posture_response__macs__descriptor;
+extern const ProtobufCMessageDescriptor zt__edge_client__pb__posture_response__operating_system__descriptor;
+extern const ProtobufCMessageDescriptor zt__edge_client__pb__posture_response__domain__descriptor;
+extern const ProtobufCMessageDescriptor zt__edge_client__pb__posture_response__process__descriptor;
+extern const ProtobufCMessageDescriptor zt__edge_client__pb__posture_response__process_list__descriptor;
+extern const ProtobufCMessageDescriptor zt__edge_client__pb__posture_response__woken__descriptor;
+extern const ProtobufCMessageDescriptor zt__edge_client__pb__posture_response__unlocked__descriptor;
+extern const ProtobufCMessageDescriptor zt__edge_client__pb__posture_response__sdk_info__descriptor;
 
 PROTOBUF_C__END_DECLS
 

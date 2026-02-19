@@ -50,7 +50,7 @@ runs:
         echo "CI_CACHE=${CI_CACHE}" >> $GITHUB_ENV
         echo "VCPKG_BINARY_SOURCES=${VCPKG_BINARY_SOURCES}" >> $GITHUB_ENV
 
-    - uses: hanzozt/ziti/setup-cli@main
+    - uses: hanzozt/zt/setup-cli@main
 
     - uses: lukka/get-cmake@v3.30.1
 
@@ -92,7 +92,7 @@ runs:
       shell: bash
 
     - name: bundle artifacts
-      run: cmake --build ./build --config ${{ inputs.config }} --target ziti-prox-c-pack --target package
+      run: cmake --build ./build --config ${{ inputs.config }} --target zt-prox-c-pack --target package
       shell: bash
 
     - name: test

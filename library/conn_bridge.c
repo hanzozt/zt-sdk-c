@@ -19,7 +19,7 @@
 #define BRIDGE_POOL_SIZE 16
 
 #define BR_LOG(lvl, fmt, ...) ZITI_LOG(lvl, "br[%d.%d] " fmt, \
-br ? br->conn->ziti_ctx->id : -1, br ? br->conn->conn_id : -1, ##__VA_ARGS__)
+br ? br->conn->zt_ctx->id : -1, br ? br->conn->conn_id : -1, ##__VA_ARGS__)
 
 struct fd_bridge_s {
     uv_os_fd_t in;
@@ -30,11 +30,11 @@ struct fd_bridge_s {
     void *ctx;
 };
 
-struct ziti_bridge_s {
+struct zt_bridge_s {
     bool closed;
-    bool ziti_eof;
+    bool zt_eof;
     bool input_eof;
-    ziti_connection conn;
+    zt_connection conn;
     uv_handle_t *input;
     uv_handle_t *output;
     uv_close_cb close_cb;
@@ -46,17 +46,17 @@ struct ziti_bridge_s {
     deadline_t idler;
 };
 
-static ssize_t on_ziti_data(ziti_connection conn, const uint8_t *data, ssize_t len);
+static ssize_t on_zt_data(zt_connection conn, const uint8_t *data, ssize_t len);
 
 static void bridge_alloc(uv_handle_t *h, size_t req, uv_buf_t *b);
-static void close_bridge(struct ziti_bridge_s *br);
+static void close_bridge(struct zt_bridge_s *br);
 
 static void on_input(uv_stream_t *s, ssize_t len, const uv_buf_t *b);
 static void on_udp_input(uv_udp_t *udp, ssize_t len, const uv_buf_t *b, const struct sockaddr *addr, unsigned int flags);
 static int fmt_addr(struct sockaddr_storage *ss, char *host, size_t host_len, int *port);
 
 
-extern int ziti_conn_bridge(ziti_connection conn, uv_handle_t *handle, uv_close_cb on_close) {
+extern int zt_conn_bridge(zt_connection conn, uv_handle_t *handle, uv_close_cb on_close) {
     if (handle == NULL || conn == NULL) return UV_EINVAL;
 
     if ( !(handle->type == UV_TCP || handle->type == UV_NAMED_PIPE ||
@@ -75,12 +75,12 @@ extern int ziti_conn_bridge(ziti_connection conn, uv_handle_t *handle, uv_close_
     }
 
     int rc;
-    if ((rc = ziti_conn_set_data_cb(conn, on_ziti_data)) != ZITI_OK) {
-        ZITI_LOG(ERROR, "failed to bridge ziti connection: %s", ziti_errorstr(rc));
+    if ((rc = zt_conn_set_data_cb(conn, on_zt_data)) != ZITI_OK) {
+        ZITI_LOG(ERROR, "failed to bridge zt connection: %s", zt_errorstr(rc));
         return UV_ECONNRESET;
     }
 
-    NEWP(br, struct ziti_bridge_s);
+    NEWP(br, struct zt_bridge_s);
     br->conn = conn;
     br->input = handle;
     br->output = handle;
@@ -89,7 +89,7 @@ extern int ziti_conn_bridge(ziti_connection conn, uv_handle_t *handle, uv_close_
     br->input_pool = pool_new(BRIDGE_MSG_SIZE, BRIDGE_POOL_SIZE, NULL);
 
     uv_handle_set_data(handle, br);
-    ziti_conn_set_data(conn, br);
+    zt_conn_set_data(conn, br);
     conn->bridged = true;
 
     rc = (br->input->type == UV_UDP) ?
@@ -119,7 +119,7 @@ static void on_sock_close(uv_handle_t *h) {
 }
 
 static void on_pipes_close(uv_handle_t *h) {
-    struct ziti_bridge_s *br = h->data;
+    struct zt_bridge_s *br = h->data;
     uv_close((uv_handle_t *) br->input, (uv_close_cb) free);
     uv_close((uv_handle_t *) br->output, (uv_close_cb) free);
     if (br->fdbr) {
@@ -130,10 +130,10 @@ static void on_pipes_close(uv_handle_t *h) {
     }
 }
 
-extern int ziti_conn_bridge_fds(ziti_connection conn, uv_os_fd_t input, uv_os_fd_t output, void (*close_cb)(void *ctx), void *ctx) {
+extern int zt_conn_bridge_fds(zt_connection conn, uv_os_fd_t input, uv_os_fd_t output, void (*close_cb)(void *ctx), void *ctx) {
     if (conn == NULL) return UV_EINVAL;
 
-    uv_loop_t *l = ziti_conn_context(conn)->loop;
+    uv_loop_t *l = zt_conn_context(conn)->loop;
 
     NEWP(fdbr, struct fd_bridge_s);
     fdbr->in = input;
@@ -164,10 +164,10 @@ extern int ziti_conn_bridge_fds(ziti_connection conn, uv_os_fd_t input, uv_os_fd
             return UV_EINVAL;
         }
 
-        return ziti_conn_bridge(conn, sock, on_sock_close);
+        return zt_conn_bridge(conn, sock, on_sock_close);
     }
 
-    NEWP(br, struct ziti_bridge_s);
+    NEWP(br, struct zt_bridge_s);
     br->conn = conn;
     br->input = calloc(1, sizeof(uv_pipe_t));
     br->output = calloc(1, sizeof(uv_pipe_t));
@@ -188,10 +188,10 @@ extern int ziti_conn_bridge_fds(ziti_connection conn, uv_os_fd_t input, uv_os_fd
     br->fdbr = fdbr;
 
     uv_handle_set_data(br->input, br);
-    ziti_conn_set_data(conn, br);
+    zt_conn_set_data(conn, br);
     conn->bridged = true;
 
-    ziti_conn_set_data_cb(conn, on_ziti_data);
+    zt_conn_set_data_cb(conn, on_zt_data);
     int rc = uv_read_start((uv_stream_t *) br->input, bridge_alloc, on_input);
     if (rc != 0) {
         BR_LOG(WARN, "failed to start reading handle: %d/%s", rc, uv_strerror(rc));
@@ -203,19 +203,19 @@ extern int ziti_conn_bridge_fds(ziti_connection conn, uv_os_fd_t input, uv_os_fd
 }
 
 static void on_bridge_idle(void *v) {
-    struct ziti_bridge_s *br = v;
+    struct zt_bridge_s *br = v;
     BR_LOG(DEBUG, "closing bridge due to idle timeout");
     close_bridge(br);
 }
 
-static void br_set_idle_timeout(struct ziti_bridge_s *br) {
+static void br_set_idle_timeout(struct zt_bridge_s *br) {
     if (br->idle_timeout > 0) { // reset idle timer
-        ztx_set_deadline(br->conn->ziti_ctx, br->idle_timeout, &br->idler, on_bridge_idle, br);
+        ztx_set_deadline(br->conn->zt_ctx, br->idle_timeout, &br->idler, on_bridge_idle, br);
     }
 }
 
-int ziti_conn_bridge_idle_timeout(ziti_connection conn, unsigned long millis) {
-    struct ziti_bridge_s *br = ziti_conn_data(conn);
+int zt_conn_bridge_idle_timeout(zt_connection conn, unsigned long millis) {
+    struct zt_bridge_s *br = zt_conn_data(conn);
     if (millis == 0) {
         br->idle_timeout = 0;
     } else {
@@ -225,13 +225,13 @@ int ziti_conn_bridge_idle_timeout(ziti_connection conn, unsigned long millis) {
     return 0;
 }
 
-static void on_ziti_close(ziti_connection conn) {
-    struct ziti_bridge_s *br = ziti_conn_data(conn);
+static void on_zt_close(zt_connection conn) {
+    struct zt_bridge_s *br = zt_conn_data(conn);
     pool_destroy(br->input_pool);
     free(br);
 }
 
-static void close_bridge(struct ziti_bridge_s *br) {
+static void close_bridge(struct zt_bridge_s *br) {
     if (br == NULL || br->closed) { return; }
 
     BR_LOG(DEBUG, "closing");
@@ -243,32 +243,32 @@ static void close_bridge(struct ziti_bridge_s *br) {
         br->input = NULL;
     }
 
-    ziti_close(br->conn, on_ziti_close);
+    zt_close(br->conn, on_zt_close);
 }
 
 static void on_shutdown(uv_shutdown_t *sr, int status) {
     // ignore UV_ECANCELED, it just means that stream was closed
     // before shutdown was processed
     if (status != 0 && status != UV_ECANCELED) {
-        struct ziti_bridge_s *br = sr->handle->data;
+        struct zt_bridge_s *br = sr->handle->data;
         BR_LOG(WARN, "shutdown failed: %d(%s)", status, uv_strerror(status));
         close_bridge(sr->handle->data);
     }
     free(sr);
 }
 
-ssize_t on_ziti_data(ziti_connection conn, const uint8_t *data, ssize_t len) {
-    struct ziti_bridge_s *br = ziti_conn_data(conn);
+ssize_t on_zt_data(zt_connection conn, const uint8_t *data, ssize_t len) {
+    struct zt_bridge_s *br = zt_conn_data(conn);
 
     if (br == NULL) {
-        ziti_close(conn, NULL);
+        zt_close(conn, NULL);
         return -1;
     }
 
     br_set_idle_timeout(br);
 
     if (len > 0) {
-        BR_LOG(TRACE, "received %zd bytes from ziti", len);
+        BR_LOG(TRACE, "received %zd bytes from zt", len);
         uv_buf_t b = uv_buf_init((char *) data, len);
 
         ssize_t rc = br->output->type == UV_UDP ?
@@ -288,8 +288,8 @@ ssize_t on_ziti_data(ziti_connection conn, const uint8_t *data, ssize_t len) {
         }
 
     } else if (len == ZITI_EOF) {
-        BR_LOG(VERBOSE, "received EOF from ziti");
-        br->ziti_eof = true;
+        BR_LOG(VERBOSE, "received EOF from zt");
+        br->zt_eof = true;
         if (br->input_eof || br->input->type == UV_UDP) {
             BR_LOG(VERBOSE, "both sides are EOF");
             close_bridge(br);
@@ -307,7 +307,7 @@ ssize_t on_ziti_data(ziti_connection conn, const uint8_t *data, ssize_t len) {
         if (len == ZITI_CONN_CLOSED) {
             BR_LOG(VERBOSE, "closing bridge");
         } else {
-            BR_LOG(WARN, "closing bridge due to error: %zd(%s)", len, ziti_errorstr((int) len));
+            BR_LOG(WARN, "closing bridge due to error: %zd(%s)", len, zt_errorstr((int) len));
         }
         close_bridge(br);
     }
@@ -315,7 +315,7 @@ ssize_t on_ziti_data(ziti_connection conn, const uint8_t *data, ssize_t len) {
 }
 
 void bridge_alloc(uv_handle_t *h, size_t req, uv_buf_t *b) {
-    struct ziti_bridge_s *br = h->data;
+    struct zt_bridge_s *br = h->data;
 
     BR_LOG(TRACE, "alloc %s", br->input_throttle ? "stalled" : "live");
 
@@ -329,12 +329,12 @@ void bridge_alloc(uv_handle_t *h, size_t req, uv_buf_t *b) {
     }
 }
 
-static void on_ziti_write(ziti_connection conn, ssize_t status, void *ctx) {
+static void on_zt_write(zt_connection conn, ssize_t status, void *ctx) {
     pool_return_obj(ctx);
-    struct ziti_bridge_s *br = ziti_conn_data(conn);
+    struct zt_bridge_s *br = zt_conn_data(conn);
 
     if (status < ZITI_OK) {
-        BR_LOG(DEBUG, "ziti_write failed: %zd/%s", status, ziti_errorstr(status));
+        BR_LOG(DEBUG, "zt_write failed: %zd/%s", status, zt_errorstr(status));
         close_bridge(br);
     }
     else if (br->input) {
@@ -355,14 +355,14 @@ static void on_ziti_write(ziti_connection conn, ssize_t status, void *ctx) {
 }
 
 void on_udp_input(uv_udp_t *udp, ssize_t len, const uv_buf_t *b, const struct sockaddr *addr, unsigned int flags) {
-    struct ziti_bridge_s *br = udp->data;
+    struct zt_bridge_s *br = udp->data;
 
     br_set_idle_timeout(br);
 
     if (len > 0) {
-        int rc = ziti_write(br->conn, (uint8_t *) b->base, len, on_ziti_write, b->base);
+        int rc = zt_write(br->conn, (uint8_t *) b->base, len, on_zt_write, b->base);
         if (rc != ZITI_OK) {
-            BR_LOG(WARN, "ziti_write failed: %d/%s", rc, ziti_errorstr(rc));
+            BR_LOG(WARN, "zt_write failed: %d/%s", rc, zt_errorstr(rc));
             close_bridge(br);
         }
     } else {
@@ -381,14 +381,14 @@ void on_udp_input(uv_udp_t *udp, ssize_t len, const uv_buf_t *b, const struct so
 }
 
 void on_input(uv_stream_t *s, ssize_t len, const uv_buf_t *b) {
-    struct ziti_bridge_s *br = s->data;
+    struct zt_bridge_s *br = s->data;
 
     br_set_idle_timeout(br);
 
     if (len > 0) {
-        int rc = ziti_write(br->conn, (uint8_t *) b->base, len, on_ziti_write, b->base);
+        int rc = zt_write(br->conn, (uint8_t *) b->base, len, on_zt_write, b->base);
         if (rc != ZITI_OK) {
-            BR_LOG(WARN, "ziti_write failed: %d/%s", rc, ziti_errorstr(rc));
+            BR_LOG(WARN, "zt_write failed: %d/%s", rc, zt_errorstr(rc));
             close_bridge(br);
         }
     } else {
@@ -401,11 +401,11 @@ void on_input(uv_stream_t *s, ssize_t len, const uv_buf_t *b) {
             }
         } else if (len == UV_EOF) {
             br->input_eof = true;
-            if (br->ziti_eof) {
+            if (br->zt_eof) {
                 BR_LOG(VERBOSE, "both sides are EOF");
                 close_bridge(br);
             } else {
-                ziti_close_write(br->conn);
+                zt_close_write(br->conn);
             }
         } else if (len < 0) {
             BR_LOG(WARN, "err = %zd", len);
@@ -414,12 +414,12 @@ void on_input(uv_stream_t *s, ssize_t len, const uv_buf_t *b) {
     }
 }
 
-int conn_bridge_info(ziti_connection conn, char *buf, size_t buflen) {
+int conn_bridge_info(zt_connection conn, char *buf, size_t buflen) {
     if (conn == NULL || !conn->bridged) {
         return ZITI_INVALID_STATE;
     }
 
-    struct ziti_bridge_s *br = conn->data;
+    struct zt_bridge_s *br = conn->data;
     const char *proto = NULL;
     struct sockaddr_storage local;
     int local_len = sizeof(local);

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <ziti/ziti.h>
+#include <zt/zt.h>
 
 #include <string.h>
 #include <stdlib.h>
@@ -22,25 +22,25 @@
 #define DIE(v) do { \
 int code = (v);\
 if (code != ZITI_OK) {\
-fprintf(stderr, "ERROR: " #v " => %s\n", ziti_errorstr(code));\
+fprintf(stderr, "ERROR: " #v " => %s\n", zt_errorstr(code));\
 exit(code);\
 }} while(0)
 
 static size_t total;
-static ziti_context ziti;
+static zt_context zt;
 
-ssize_t on_data(ziti_connection c, const uint8_t *buf, ssize_t len) {
+ssize_t on_data(zt_connection c, const uint8_t *buf, ssize_t len) {
     if (len == ZITI_EOF) {
 
-        printf("request completed: %s\n", ziti_errorstr(len));
-        ziti_close(c, NULL);
-        ziti_shutdown(ziti);
+        printf("request completed: %s\n", zt_errorstr(len));
+        zt_close(c, NULL);
+        zt_shutdown(zt);
 
     }
     else if (len < 0) {
-        fprintf(stderr, "unexpected error: %s\n", ziti_errorstr(len));
-        ziti_close(c, NULL);
-        ziti_shutdown(ziti);
+        fprintf(stderr, "unexpected error: %s\n", zt_errorstr(len));
+        zt_close(c, NULL);
+        zt_shutdown(zt);
     }
     else {
         total += len;
@@ -49,16 +49,16 @@ ssize_t on_data(ziti_connection c, const uint8_t *buf, ssize_t len) {
     return len;
 }
 
-static void on_write(ziti_connection conn, ssize_t status, void *ctx) {
+static void on_write(zt_connection conn, ssize_t status, void *ctx) {
     if (status < 0) {
-        fprintf(stderr, "request failed to submit status[%zd]: %s\n", status, ziti_errorstr((int) status));
+        fprintf(stderr, "request failed to submit status[%zd]: %s\n", status, zt_errorstr((int) status));
     }
     else {
         printf("request success: %zd bytes sent\n", status);
     }
 }
 
-void on_connect(ziti_connection conn, int status) {
+void on_connect(zt_connection conn, int status) {
     DIE(status);
 
     printf("sending HTTP request\n");
@@ -70,16 +70,16 @@ void on_connect(ziti_connection conn, int status) {
                    "User-Agent: curl/7.59.0\r\n"
                    "\r\n";
 
-    DIE(ziti_write(conn, (uint8_t *) req, strlen(req), on_write, NULL));
+    DIE(zt_write(conn, (uint8_t *) req, strlen(req), on_write, NULL));
 }
 
-void on_ziti_init(ziti_context ztx, const ziti_event_t *ev) {
+void on_zt_init(zt_context ztx, const zt_event_t *ev) {
     DIE(ev->ctx.ctrl_status);
-    ziti = ztx;
+    zt = ztx;
 
-    ziti_connection conn;
-    DIE(ziti_conn_init(ziti, &conn, NULL));
-    DIE(ziti_dial(conn, "demo-weather", on_connect, on_data));
+    zt_connection conn;
+    DIE(zt_conn_init(zt, &conn, NULL));
+    DIE(zt_dial(conn, "demo-weather", on_connect, on_data));
 }
 
 int main(int argc, char** argv) {
@@ -88,22 +88,22 @@ int main(int argc, char** argv) {
     SetConsoleOutputCP(65001);
 #endif
     uv_loop_t *loop = uv_default_loop();
-    ziti_config cfg;
-    ziti_context ztx;
-    ziti_options options = (ziti_options) {
-            .event_cb = on_ziti_init,
+    zt_config cfg;
+    zt_context ztx;
+    zt_options options = (zt_options) {
+            .event_cb = on_zt_init,
             .events = ZitiContextEvent,
     };
 
-    DIE(ziti_load_config(&cfg, argv[1]));
-    DIE(ziti_context_init(&ztx, &cfg));
-    DIE(ziti_context_set_options(ztx, &options));
-    DIE(ziti_context_run(ztx, loop));
+    DIE(zt_load_config(&cfg, argv[1]));
+    DIE(zt_context_init(&ztx, &cfg));
+    DIE(zt_context_set_options(ztx, &options));
+    DIE(zt_context_run(ztx, loop));
 
-    // loop will finish after the request is complete and ziti_shutdown is called
+    // loop will finish after the request is complete and zt_shutdown is called
     uv_run(loop, UV_RUN_DEFAULT);
 
     printf("========================\n");
 
-    ziti_shutdown(ziti);
+    zt_shutdown(zt);
 }

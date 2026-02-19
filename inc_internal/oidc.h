@@ -18,7 +18,7 @@
 #define ZITI_SDK_OIDC_H
 
 #include <uv.h>
-#include <ziti/ziti_model.h>
+#include <zt/zt_model.h>
 #include "tlsuv/http.h"
 #include <stc/cstr.h>
 

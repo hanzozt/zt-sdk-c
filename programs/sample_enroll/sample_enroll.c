@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <ziti/ziti.h>
+#include <zt/zt.h>
 
 #include <string.h>
 #include <stdlib.h>
@@ -26,17 +26,17 @@
 #define DIE(v) do { \
 int code = (v);\
 if (code != ZITI_OK) {\
-fprintf(stderr, "ERROR: " #v " => %s\n", ziti_errorstr(code));\
+fprintf(stderr, "ERROR: " #v " => %s\n", zt_errorstr(code));\
 exit(code);\
 }} while(0)
 
 const char *output_file;
 
-static int write_identity_file(ziti_config *cfg) {
+static int write_identity_file(zt_config *cfg) {
     FILE *f;
 
     size_t len;
-    char *output_buf = ziti_config_to_json(cfg, 0, &len);
+    char *output_buf = zt_config_to_json(cfg, 0, &len);
 
     if ((f = fopen(output_file, "wb")) == NULL) {
         return (-1);
@@ -53,7 +53,7 @@ static int write_identity_file(ziti_config *cfg) {
     return rc;
 }
 
-void on_ziti_enroll(ziti_config *cfg, int status, char *err_message, void *ctx) {
+void on_zt_enroll(zt_config *cfg, int status, char *err_message, void *ctx) {
 
     if (status != ZITI_OK) {
         fprintf(stderr, "ERROR: => %d => %s\n", status, err_message);
@@ -70,7 +70,7 @@ struct enroll_cert {
     const char *key;
     const char *cert;
 };
-#include <ziti/zitilib.h>
+#include <zt/ztlib.h>
 
 int main(int argc, char **argv) {
     if (argc < 3) {
@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
 
     output_file = argv[2];
 
-    ziti_enroll_opts opts = {0};
+    zt_enroll_opts opts = {0};
     struct enroll_cert cert;
     opts.jwt = argv[1];
 
@@ -99,9 +99,9 @@ int main(int argc, char **argv) {
         opts.enroll_cert = realpath(argv[4], NULL);
     }
 
-    DIE(ziti_enroll(&opts, loop, on_ziti_enroll, NULL));
+    DIE(zt_enroll(&opts, loop, on_zt_enroll, NULL));
 
-    // loop will finish after the request is complete and ziti_shutdown is called
+    // loop will finish after the request is complete and zt_shutdown is called
     uv_run(loop, UV_RUN_DEFAULT);
 
     printf("\nSuccess\n");
@@ -136,13 +136,13 @@ int main(int argc, char **argv) {
         FILE *id_file = fopen(argv[2], "w");
         if (id_file) {
             fprintf(id_file, "%.*s", (int) len, cfg);
-            printf("ziti identity is saved in %s\n", argv[2]);
+            printf("zt identity is saved in %s\n", argv[2]);
         }
         else {
             printf("err = %d(%s)\n", errno, strerror(errno));
         }
     } else {
-        printf("err = %d(%s)\n", rc, ziti_errorstr(rc));
+        printf("err = %d(%s)\n", rc, zt_errorstr(rc));
     }
     free(cfg);
     Ziti_lib_shutdown();

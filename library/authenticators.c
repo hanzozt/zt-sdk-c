@@ -17,9 +17,9 @@ limitations under the License.
 #include "authenticators.h"
 
 typedef struct authenticator_ctx_s {
-    ziti_context ztx;
-    ziti_extend_cert_authenticator_cb extend_cb;
-    ziti_verify_extend_cert_authenticator_cb verify_cb;
+    zt_context ztx;
+    zt_extend_cert_authenticator_cb extend_cb;
+    zt_verify_extend_cert_authenticator_cb verify_cb;
     void* ctx;
     char* csr_pem;
     char* authenticator_id;
@@ -28,9 +28,9 @@ typedef struct authenticator_ctx_s {
 const char* CAN_NOT_UPDATE_AUTHENTICATOR = "CAN_NOT_UPDATE_AUTHENTICATOR";
 const char* UNAUTHORIZED = "UNAUTHORIZED";
 
-static void extend_cb(ziti_extend_cert_authenticator_resp* resp, const ziti_error* err, void* ctx) {
+static void extend_cb(zt_extend_cert_authenticator_resp* resp, const zt_error* err, void* ctx) {
     authenticator_ctx* wrapped_ctx = (authenticator_ctx*)ctx;
-    ziti_context ztx = wrapped_ctx->ztx;
+    zt_context ztx = wrapped_ctx->ztx;
 
     if(err){
         ZTX_LOG(ERROR, "error response returned when attempting to extend authenticator: %d %s: %s, calling cb",
@@ -55,12 +55,12 @@ static void extend_cb(ziti_extend_cert_authenticator_resp* resp, const ziti_erro
     FREE(wrapped_ctx->csr_pem);
     FREE(wrapped_ctx);
 
-    free_ziti_extend_cert_authenticator_resp(resp);
+    free_zt_extend_cert_authenticator_resp(resp);
 }
 
-static void verify_cb(void* empty, const ziti_error* err, void* ctx){
+static void verify_cb(void* empty, const zt_error* err, void* ctx){
     authenticator_ctx* wrapped_ctx = (authenticator_ctx*)ctx;
-    ziti_context ztx = wrapped_ctx->ztx;
+    zt_context ztx = wrapped_ctx->ztx;
 
     if(err) {
         ZTX_LOG(ERROR, "error response returned when attempting to verify extended authenticator: %d %s: %s",
@@ -83,7 +83,7 @@ static void verify_cb(void* empty, const ziti_error* err, void* ctx){
     FREE(wrapped_ctx);
 }
 
-int ziti_extend_cert_authenticator(ziti_context ztx, const char *csr_pem, ziti_extend_cert_authenticator_cb cb, void *ctx) {
+int zt_extend_cert_authenticator(zt_context ztx, const char *csr_pem, zt_extend_cert_authenticator_cb cb, void *ctx) {
     // TODO this relies on api_session.authenticator_id
     // need to normalize it wrt HA when api_session is not available
     ZITI_LOG(ERROR, "not implemented!!!");
@@ -99,7 +99,7 @@ int ziti_extend_cert_authenticator(ziti_context ztx, const char *csr_pem, ziti_e
     return ZITI_WTF;
 }
 
-int ziti_verify_extend_cert_authenticator(ziti_context ztx, const char *new_cert, ziti_verify_extend_cert_authenticator_cb  cb, void *ctx) {
+int zt_verify_extend_cert_authenticator(zt_context ztx, const char *new_cert, zt_verify_extend_cert_authenticator_cb  cb, void *ctx) {
     // TODO this relies on api_session.authenticator_id
     // need to normalize it wrt HA when api_session is not available
     ZITI_LOG(ERROR, "not implemented!!!");
@@ -117,7 +117,7 @@ int ziti_verify_extend_cert_authenticator(ziti_context ztx, const char *new_cert
 //    wrapped_ctx->verify_cb = cb;
 //    wrapped_ctx->authenticator_id = strdup(ztx->api_session->authenticator_id);
 //
-//    ziti_ctrl_verify_extend_cert_authenticator(&ztx->controller, wrapped_ctx->authenticator_id, new_cert, verify_cb, wrapped_ctx);
+//    zt_ctrl_verify_extend_cert_authenticator(&ztx->controller, wrapped_ctx->authenticator_id, new_cert, verify_cb, wrapped_ctx);
 //
 //    return ZITI_OK;
 }

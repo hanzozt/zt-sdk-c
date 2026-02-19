@@ -7,7 +7,7 @@ endif ()
 message("catch2 is ${Catch2_CONFIG}")
 
 add_executable(all_tests
-        test_ziti_model.cpp
+        test_zt_model.cpp
         test_jwt.cpp
         model_tests.cpp
         test_metrics.cpp
@@ -16,7 +16,7 @@ add_executable(all_tests
         buffer_tests.cpp
         pool_tests.cpp
         catch2_includes.hpp
-        ziti_src_tests.cpp
+        zt_src_tests.cpp
         message_tests.cpp
         util_tests.cpp)
 
@@ -29,23 +29,23 @@ endif ()
 target_compile_definitions(all_tests
         PRIVATE ZITI_TEST_DIR=${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(all_tests
-        PRIVATE ${ziti-sdk_SOURCE_DIR}/inc_internal
-        PRIVATE ${ziti-sdk_SOURCE_DIR}/library
+        PRIVATE ${zt-sdk_SOURCE_DIR}/inc_internal
+        PRIVATE ${zt-sdk_SOURCE_DIR}/library
 )
 
 target_link_libraries(all_tests
-        PRIVATE ziti
+        PRIVATE zt
         PRIVATE Catch2::Catch2 Catch2::Catch2WithMain)
 
-add_executable(zitilib-tests zitilib-tests.cpp)
-target_link_libraries(zitilib-tests
-        PUBLIC ziti
+add_executable(ztlib-tests ztlib-tests.cpp)
+target_link_libraries(ztlib-tests
+        PUBLIC zt
         PRIVATE Catch2::Catch2WithMain)
 
 include(CTest)
 add_test(quick_tests all_tests -d yes "~[integ]~[metrics]")
 
-add_test(zitilib_tests zitilib-tests -d yes)
+add_test(ztlib_tests ztlib-tests -d yes)
 
 add_subdirectory(integ)
 

@@ -26,9 +26,9 @@ extern "C" {
 #endif
 
 
-int ziti_extend_cert_authenticator(ziti_context ztx, const char *csr_pem, ziti_extend_cert_authenticator_cb cb, void *ctx);
+int zt_extend_cert_authenticator(zt_context ztx, const char *csr_pem, zt_extend_cert_authenticator_cb cb, void *ctx);
 
-int ziti_verify_extend_cert_authenticator(ziti_context ztx, const char *new_cert, ziti_verify_extend_cert_authenticator_cb cb, void *ctx);
+int zt_verify_extend_cert_authenticator(zt_context ztx, const char *new_cert, zt_verify_extend_cert_authenticator_cb cb, void *ctx);
 
 #ifdef __cplusplus
 }

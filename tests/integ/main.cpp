@@ -15,8 +15,8 @@
 //
 
 #include <catch2/catch_all.hpp>
-#include <ziti/zitilib.h>
-#include <ziti/ziti.h>
+#include <zt/ztlib.h>
+#include <zt/zt.h>
 
 class ZitilibManager: public Catch::EventListenerBase{
 
@@ -35,6 +35,6 @@ public:
 CATCH_REGISTER_LISTENER(ZitilibManager)
 
 TEST_CASE("version", "[integ]") {
-    const ziti_version *version = ziti_get_version();
+    const zt_version *version = zt_get_version();
     REQUIRE(version != nullptr);
 }

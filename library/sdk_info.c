@@ -41,8 +41,8 @@ typedef uint32_t in_addr_t;
 
 
 static uv_once_t info_once;
-static ziti_env_info s_info;
-static void ziti_info_init() {
+static zt_env_info s_info;
+static void zt_info_init() {
     static uv_utsname_t os_info;
     static char s_hostname[UV_MAXHOSTNAMESIZE];
     static char s_domain[UV_MAXHOSTNAMESIZE];
@@ -102,13 +102,13 @@ static void ziti_info_init() {
     s_info.domain = s_domain;
 }
 
-const ziti_env_info* get_env_info() {
-    uv_once(&info_once, ziti_info_init);
+const zt_env_info* get_env_info() {
+    uv_once(&info_once, zt_info_init);
 
     return &s_info;
 }
 
-void ziti_set_device_id(const char *device_id) {
+void zt_set_device_id(const char *device_id) {
     free((void*)s_info.device_id);
     s_info.device_id = NULL;
 

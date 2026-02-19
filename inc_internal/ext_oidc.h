@@ -18,7 +18,7 @@
 #define ZITI_EXT_OIDC_H
 
 #include <uv.h>
-#include <ziti/ziti_model.h>
+#include <zt/zt_model.h>
 #include "tlsuv/http.h"
 
 #ifdef __cplusplus
@@ -41,7 +41,7 @@ struct ext_oidc_client_s {
     void *data;
     tlsuv_http_t http;
 
-    ziti_jwt_signer signer_cfg;
+    zt_jwt_signer signer_cfg;
 
     ext_oidc_token_cb token_cb;
     ext_oidc_close_cb close_cb;
@@ -62,7 +62,7 @@ struct ext_oidc_client_s {
 
 // init
 int ext_oidc_client_init(uv_loop_t *loop, ext_oidc_client_t *clt,
-                     const struct ziti_jwt_signer_s *cfg);
+                     const struct zt_jwt_signer_s *cfg);
 
 void ext_oidc_client_set_link_cb(ext_oidc_client_t *clt, ext_oidc_link_cb, void *ctx);
 

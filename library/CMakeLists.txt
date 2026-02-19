@@ -24,7 +24,7 @@ endif ()
 pkg_check_modules(PBUFC REQUIRED IMPORTED_TARGET libprotobuf-c)
 message("libprotobuf-c[${PBUFC_VERSION}] is ${PBUFC_LINK_LIBRARIES}")
 
-if (ziti_DEVELOPER_MODE)
+if (zt_DEVELOPER_MODE)
     find_program(PROTO_GEN protoc)
     find_program(PROTO_GEN_C protoc-gen-c)
     if (PROTO_GEN AND PROTO_GEN_C)
@@ -65,37 +65,37 @@ endif()
 pkg_check_modules(STC REQUIRED IMPORTED_TARGET stc)
 
 set(ZITI_HEADER_FILES
-        ${PROJECT_SOURCE_DIR}/includes/ziti/errors.h
-        ${PROJECT_SOURCE_DIR}/includes/ziti/ziti.h
-        ${PROJECT_SOURCE_DIR}/includes/ziti/enums.h
-        ${PROJECT_SOURCE_DIR}/includes/ziti/ziti_src.h
-        ${PROJECT_SOURCE_DIR}/includes/ziti/ziti_events.h
-        ${PROJECT_SOURCE_DIR}/includes/ziti/ziti_buffer.h
-        ${PROJECT_SOURCE_DIR}/includes/ziti/zitilib.h
-        ${PROJECT_SOURCE_DIR}/includes/ziti/model_collections.h
-        ${PROJECT_SOURCE_DIR}/includes/ziti/types.h
+        ${PROJECT_SOURCE_DIR}/includes/zt/errors.h
+        ${PROJECT_SOURCE_DIR}/includes/zt/zt.h
+        ${PROJECT_SOURCE_DIR}/includes/zt/enums.h
+        ${PROJECT_SOURCE_DIR}/includes/zt/zt_src.h
+        ${PROJECT_SOURCE_DIR}/includes/zt/zt_events.h
+        ${PROJECT_SOURCE_DIR}/includes/zt/zt_buffer.h
+        ${PROJECT_SOURCE_DIR}/includes/zt/ztlib.h
+        ${PROJECT_SOURCE_DIR}/includes/zt/model_collections.h
+        ${PROJECT_SOURCE_DIR}/includes/zt/types.h
         )
 
 SET(ZITI_SRC_FILES
         sdk_info.c
         utils.c
-        ziti.c
+        zt.c
         config.c
         errors.c
-        ziti_enroll.c
-        ziti_ctrl.c
+        zt_enroll.c
+        zt_ctrl.c
         model_support.c
         internal_model.c
         connect.c
         channel.c
         message.c
         buffer.c
-        ziti_src.c
+        zt_src.c
         metrics.c
         posture.c
         auth_queries.c
         conn_bridge.c
-        zitilib.c
+        ztlib.c
         pool.c
         model_collections.c
         authenticators.c
@@ -120,7 +120,7 @@ SET(ZITI_INCLUDE_DIRS
     PRIVATE ${tlsuv_SOURCE_DIR}/src
 )
 
-set(ziti_compile_defs
+set(zt_compile_defs
         ZITI_VERSION=${PROJECT_VERSION}
         ZITI_BRANCH=${GIT_BRANCH}
         ZITI_COMMIT=${GIT_COMMIT_HASH}
@@ -139,7 +139,7 @@ function(define_file_basename_for_sources targetname)
     endforeach()
 endfunction()
 
-function(config_ziti_library target)
+function(config_zt_library target)
     target_sources(${target} PRIVATE
             ${ZITI_SRC_FILES}
             ${ZITI_HEADER_FILES})
@@ -153,7 +153,7 @@ function(config_ziti_library target)
 
     target_include_directories(${target} ${ZITI_INCLUDE_DIRS})
     target_compile_definitions(${target} PUBLIC
-            ${ziti_compile_defs}
+            ${zt_compile_defs}
     )
 
     target_link_libraries(${target} PUBLIC
@@ -196,32 +196,32 @@ function(config_ziti_library target)
     endif (MSVC)
 
     install(TARGETS ${target}
-            COMPONENT ziti-sdk
+            COMPONENT zt-sdk
             DESTINATION ${CMAKE_INSTALL_LIBDIR}
     )
     define_file_basename_for_sources(${target})
-endfunction(config_ziti_library)
+endfunction(config_zt_library)
 
-add_library(ziti STATIC)
-config_ziti_library(ziti)
+add_library(zt STATIC)
+config_zt_library(zt)
 
 if (BUILD_SHARED_LIBS)
-    add_library(ziti_dll SHARED)
-    config_ziti_library(ziti_dll)
-    set_target_properties(ziti_dll PROPERTIES OUTPUT_NAME "ziti")
+    add_library(zt_dll SHARED)
+    config_zt_library(zt_dll)
+    set_target_properties(zt_dll PROPERTIES OUTPUT_NAME "zt")
 
     # when building on windows an "import library" is generated which is overwriting the
-    # static library (ziti.lib) (google/see /IMPLIB (Name Import Library))
+    # static library (zt.lib) (google/see /IMPLIB (Name Import Library))
     # work around discovered at stack overflow:
     #     https://stackoverflow.com/questions/34575066/how-to-prevent-cmake-from-issuing-implib
     #
     # I chose to set the suffix and not the prefix
-    # set_target_properties(ziti_dll PROPERTIES IMPORT_PREFIX "import-lib-")
-    set_target_properties(ziti_dll PROPERTIES
+    # set_target_properties(zt_dll PROPERTIES IMPORT_PREFIX "import-lib-")
+    set_target_properties(zt_dll PROPERTIES
             IMPORT_SUFFIX ".imp.lib"
-            OUTPUT_NAME "ziti")
+            OUTPUT_NAME "zt")
 
-    target_compile_definitions(ziti_dll PUBLIC
+    target_compile_definitions(zt_dll PUBLIC
             INTERFACE USING_ZITI_SHARED=1
             PRIVATE BUILDING_ZITI_SHARED=1
     )
@@ -231,13 +231,13 @@ set(includedir ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR})
 set(libdir ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
 set(prefix ${CMAKE_INSTALL_PREFIX})
 
-configure_file(${PROJECT_SOURCE_DIR}/ziti.pc.in ${CMAKE_CURRENT_BINARY_DIR}/ziti.pc @ONLY)
+configure_file(${PROJECT_SOURCE_DIR}/zt.pc.in ${CMAKE_CURRENT_BINARY_DIR}/zt.pc @ONLY)
 
 set(CMAKE_INSTALL_DOCDIR share/doc)
 
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../includes/
-        COMPONENT ziti-sdk
+        COMPONENT zt-sdk
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ziti.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/zt.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 

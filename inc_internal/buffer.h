@@ -18,7 +18,7 @@ limitations under the License.
 #define ZITI_SDK_BUFFER_H
 
 #include <stdint.h>
-#include <ziti/ziti_buffer.h>
+#include <zt/zt_buffer.h>
 
 #if !defined(__DEFINED_ssize_t) && !defined(__ssize_t_defined)
 #if _WIN32

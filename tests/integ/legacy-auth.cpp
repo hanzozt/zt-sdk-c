@@ -16,7 +16,7 @@
 
 #include <iostream>
 #include <zt_internal.h>
-#include <ziti_ctrl.h>
+#include <zt_ctrl.h>
 #include <utils.h>
 
 #include "test-data.h"
@@ -29,18 +29,18 @@ using namespace Catch::Matchers;
 
 
 TEST_CASE("invalid_controller", "[controller][GH-44]") {
-    ziti_controller ctrl;
+    zt_controller ctrl;
     uv_loop_t *loop = uv_default_loop();
-    resp_capture<ziti_version> version;
+    resp_capture<zt_version> version;
 
-    PREP(ziti);
+    PREP(zt);
     model_list endpoints = {nullptr};
-    model_list_append(&endpoints, (void*)"https://not.a.ziti.controll.er");
-    TRY(ziti, ziti_ctrl_init(loop, &ctrl, &endpoints, nullptr));
+    model_list_append(&endpoints, (void*)"https://not.a.zt.controll.er");
+    TRY(zt, zt_ctrl_init(loop, &ctrl, &endpoints, nullptr));
     model_list_clear(&endpoints, nullptr);
 
     WHEN("get version") {
-        ziti_ctrl_get_version(&ctrl, resp_cb, &version);
+        zt_ctrl_get_version(&ctrl, resp_cb, &version);
         uv_run(loop, UV_RUN_DEFAULT);
 
         THEN("callback with proper error") {
@@ -49,95 +49,95 @@ TEST_CASE("invalid_controller", "[controller][GH-44]") {
         }
     }
 
-    CATCH(ziti) {
+    CATCH(zt) {
         FAIL("unexpected error");
     }
 
-    ziti_ctrl_close(&ctrl);
+    zt_ctrl_close(&ctrl);
     uv_run(loop, UV_RUN_DEFAULT);
 }
 
 TEST_CASE("controller_test","[integ]") {
     const char *conf = TEST_CLIENT;
 
-    ziti_config config{};
+    zt_config config{};
     tls_credentials creds{};
     tls_context *tls = nullptr;
-    ziti_controller ctrl{};
+    zt_controller ctrl{};
     uv_loop_t *loop = uv_default_loop();
 
-    REQUIRE(ziti_load_config(&config, conf) == ZITI_OK);
+    REQUIRE(zt_load_config(&config, conf) == ZITI_OK);
     REQUIRE(load_tls(&config, &tls, &creds) == ZITI_OK);
-    REQUIRE(ziti_ctrl_init(loop, &ctrl, &config.controllers, tls) == ZITI_OK);
+    REQUIRE(zt_ctrl_init(loop, &ctrl, &config.controllers, tls) == ZITI_OK);
 
-    resp_capture<ziti_version> version;
-    resp_capture<ziti_api_session> session;
-    resp_capture<ziti_service> service;
+    resp_capture<zt_version> version;
+    resp_capture<zt_api_session> session;
+    resp_capture<zt_service> service;
 
     WHEN("get version and login") {
-        auto v = ctrl_get(ctrl, ziti_ctrl_get_version);
+        auto v = ctrl_get(ctrl, zt_ctrl_get_version);
         REQUIRE(v != nullptr);
 
         auto v1 = (const char*)model_map_get(&v->api_versions->edge, "v1");
         CHECK(v1 != nullptr);
 
         auto s = ctrl_login(ctrl);
-        free_ziti_api_session_ptr(s);
+        free_zt_api_session_ptr(s);
     }
 
     WHEN("try to get services before login") {
-        REQUIRE_THROWS(ctrl_get1(ctrl, ziti_ctrl_get_service, SERVICE_NAME));
+        REQUIRE_THROWS(ctrl_get1(ctrl, zt_ctrl_get_service, SERVICE_NAME));
     }
 
     WHEN("try to login and get non-existing service") {
         auto api_sesh = ctrl_login(ctrl);
 
-        auto s = ctrl_get1(ctrl, ziti_ctrl_get_service, "this-service-should-not-exist");
+        auto s = ctrl_get1(ctrl, zt_ctrl_get_service, "this-service-should-not-exist");
         THEN("should NOT get non-existent service") {
             REQUIRE(s == nullptr);
         }
-        free_ziti_api_session_ptr(api_sesh);
+        free_zt_api_session_ptr(api_sesh);
     }
 
     WHEN("try to login, get service, and session") {
         auto api_session = ctrl_login(ctrl);
 
-        auto services = ctrl_get(ctrl, ziti_ctrl_get_services);
-        ziti_service *s = services[0];
+        auto services = ctrl_get(ctrl, zt_ctrl_get_services);
+        zt_service *s = services[0];
 
         THEN("should get service") {
             REQUIRE(s != nullptr);
         }AND_THEN("should get api_session") {
-            auto ns = ctrl_get2(ctrl, ziti_ctrl_create_session, (const char *) s->id, *s->permissions[0]);
+            auto ns = ctrl_get2(ctrl, zt_ctrl_create_session, (const char *) s->id, *s->permissions[0]);
             REQUIRE(ns != nullptr);
             REQUIRE(ns->token != nullptr);
-            free_ziti_session_ptr(ns);
-            free_ziti_service_array(&services);
+            free_zt_session_ptr(ns);
+            free_zt_service_array(&services);
         }
         AND_THEN("logout should succeed") {
-            ctrl_get(ctrl, ziti_ctrl_logout);
+            ctrl_get(ctrl, zt_ctrl_logout);
         }
 
-        free_ziti_api_session_ptr(api_session);
+        free_zt_api_session_ptr(api_session);
     }
 
-    free_ziti_version(version.resp);
-    free_ziti_api_session(session.resp);
+    free_zt_version(version.resp);
+    free_zt_api_session(session.resp);
 
-    ziti_ctrl_close(&ctrl);
+    zt_ctrl_close(&ctrl);
     uv_run(loop, UV_RUN_DEFAULT);
     tls->free_ctx(tls);
-    free_ziti_config(&config);
+    free_zt_config(&config);
 }
 
 TEST_CASE("ztx-legacy-auth", "[integ]") {
     const char *zid = TEST_CLIENT;
 
-    ziti_config cfg;
-    REQUIRE(ziti_load_config(&cfg, zid) == ZITI_OK);
+    zt_config cfg;
+    REQUIRE(zt_load_config(&cfg, zid) == ZITI_OK);
 
-    ziti_context ztx;
-    REQUIRE(ziti_context_init(&ztx, &cfg) == ZITI_OK);
+    zt_context ztx;
+    REQUIRE(zt_context_init(&ztx, &cfg) == ZITI_OK);
 
     struct test_context_s {
         int event;
@@ -147,26 +147,26 @@ TEST_CASE("ztx-legacy-auth", "[integ]") {
     };
 
 
-    ziti_options opts = {};
+    zt_options opts = {};
     opts.app_ctx = &test_context;
     opts.events = ZitiContextEvent;
-    opts.event_cb = [](ziti_context ztx, const ziti_event_t *event){
+    opts.event_cb = [](zt_context ztx, const zt_event_t *event){
             printf("got event: %d => %s \n", event->type, event->ctx.err);
-            auto test_ctx = (test_context_s*)ziti_app_ctx(ztx);
+            auto test_ctx = (test_context_s*)zt_app_ctx(ztx);
             test_ctx->event = event->type;
         };
 
-    ziti_context_set_options(ztx, &opts);
+    zt_context_set_options(ztx, &opts);
 
     auto l = uv_loop_new();
-    ziti_context_run(ztx, l);
+    zt_context_run(ztx, l);
 
     while (test_context.event == 0) {
         uv_run(l, UV_RUN_ONCE);
     }
 
-    ziti_shutdown(ztx);
+    zt_shutdown(ztx);
     uv_run(l, UV_RUN_DEFAULT);
 
-    free_ziti_config(&cfg);
+    free_zt_config(&cfg);
 }

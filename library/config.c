@@ -21,14 +21,14 @@
 const char* APP_ID = NULL;
 const char* APP_VERSION = NULL;
 
-void ziti_set_app_info(const char *app_id, const char *app_version) {
+void zt_set_app_info(const char *app_id, const char *app_version) {
     FREE(APP_ID);
     FREE(APP_VERSION);
     APP_ID = strdup(app_id);
     APP_VERSION = strdup(app_version);
 }
 
-static int load_config_file(const char *filename, ziti_config *cfg) {
+static int load_config_file(const char *filename, zt_config *cfg) {
     size_t config_len = 0;
     char *config = NULL;
     int rc = load_file(filename, 0, &config, &config_len);
@@ -38,7 +38,7 @@ static int load_config_file(const char *filename, ziti_config *cfg) {
         return ZITI_CONFIG_NOT_FOUND;
     }
 
-    if (parse_ziti_config(cfg, config, config_len) < 0) {
+    if (parse_zt_config(cfg, config, config_len) < 0) {
         free(config);
         return ZITI_INVALID_CONFIG;
     }
@@ -47,7 +47,7 @@ static int load_config_file(const char *filename, ziti_config *cfg) {
     return ZITI_OK;
 }
 
-int ziti_load_config(ziti_config *cfg, const char *cfgstr) {
+int zt_load_config(zt_config *cfg, const char *cfgstr) {
     if (!cfgstr) {
         return ZITI_INVALID_CONFIG;
     }
@@ -63,7 +63,7 @@ int ziti_load_config(ziti_config *cfg, const char *cfgstr) {
     memset(cfg, 0, sizeof(*cfg));
     int rc;
     if (seems_like_json) {
-        rc = parse_ziti_config(cfg, cfgstr, strlen(cfgstr));
+        rc = parse_zt_config(cfg, cfgstr, strlen(cfgstr));
 
         if (rc < 0) {
             ZITI_LOG(DEBUG, "trying to load config from file[%s]", cfgstr);

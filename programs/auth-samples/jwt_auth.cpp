@@ -27,9 +27,9 @@
 #include <sstream>
 #include <vector>
 #include <CLI/CLI.hpp>
-#include "ziti/ziti_model.h"
-#include "ziti/ziti.h"
-#include "ziti/ziti_log.h"
+#include "zt/zt_model.h"
+#include "zt/zt.h"
+#include "zt/zt_log.h"
 
 struct prompt_work {
     uv_work_t w{};
@@ -37,7 +37,7 @@ struct prompt_work {
     std::string result;
 
     void *data;
-    void (*cb)(ziti_context, const std::string&, void *data);
+    void (*cb)(zt_context, const std::string&, void *data);
 };
 
 static void prompt_w(prompt_work *w) {
@@ -46,13 +46,13 @@ static void prompt_w(prompt_work *w) {
 }
 
 static void prompt_d(prompt_work *w, int status) {
-    w->cb(static_cast<ziti_context>(w->w.data), w->result, w->data);
+    w->cb(static_cast<zt_context>(w->w.data), w->result, w->data);
     delete w;
 }
 
-static void prompt(ziti_context z, const std::string &prompt, void *data,
-                   void (*cb)(ziti_context, const std::string &resp, void *)){
-    auto l = (uv_loop_t *)ziti_app_ctx(z);
+static void prompt(zt_context z, const std::string &prompt, void *data,
+                   void (*cb)(zt_context, const std::string &resp, void *)){
+    auto l = (uv_loop_t *)zt_app_ctx(z);
     auto work = new prompt_work;
     work->prompt = prompt;
     work->cb = cb;
@@ -64,13 +64,13 @@ static void prompt(ziti_context z, const std::string &prompt, void *data,
 }
 
 
-static void on_auth_event(ziti_context ztx, const ziti_auth_event &ev) {
+static void on_auth_event(zt_context ztx, const zt_auth_event &ev) {
     switch (ev.action) {
-        case ziti_auth_prompt_totp:
+        case zt_auth_prompt_totp:
             break;
-        case ziti_auth_prompt_pin:
+        case zt_auth_prompt_pin:
             break;
-        case ziti_auth_select_external: {
+        case zt_auth_select_external: {
             std::stringstream pr;
             int i;
             auto ids = new std::vector<std::string>;
@@ -80,20 +80,20 @@ static void on_auth_event(ziti_context ztx, const ziti_auth_event &ev) {
                 pr << i << ": " << p->name << " " << p->provider_url << std::endl;
             }
             pr << "Select provider(0-" << (i-1) << "): ";
-            prompt(ztx, pr.str(), ids, [](ziti_context z, const std::string &res, void *data){
+            prompt(ztx, pr.str(), ids, [](zt_context z, const std::string &res, void *data){
                 auto ids = (std::vector<std::string>*)data;
                 auto idx = stoi(res);
                 auto id = (*ids)[idx];
-                auto rc = ziti_use_ext_jwt_signer(z, id.c_str());
+                auto rc = zt_use_ext_jwt_signer(z, id.c_str());
                 if (rc != ZITI_OK) {
-                    std::cerr << "failed to select provider: " << ziti_errorstr(rc) << std::endl;
+                    std::cerr << "failed to select provider: " << zt_errorstr(rc) << std::endl;
                 }
                 delete ids;
             });
             break;
         }
-        case ziti_auth_login_external: {
-            ziti_ext_auth(ztx, [](ziti_context ztx, const char *url, void*){
+        case zt_auth_login_external: {
+            zt_ext_auth(ztx, [](zt_context ztx, const char *url, void*){
                 std::cout << "continue auth: " << url << std::endl;
             }, ztx);
             break;
@@ -104,11 +104,11 @@ static void on_auth_event(ziti_context ztx, const ziti_auth_event &ev) {
     }
 }
 
-static void event_handler(ziti_context ztx, const ziti_event_t *ev){
+static void event_handler(zt_context ztx, const zt_event_t *ev){
     switch (ev->type) {
         case ZitiContextEvent: {
-            const ziti_context_event &event = ev->ctx;
-            std::cout << "ztx status: " << ziti_errorstr(event.ctrl_status) << std::endl;
+            const zt_context_event &event = ev->ctx;
+            std::cout << "ztx status: " << zt_errorstr(event.ctrl_status) << std::endl;
             break;
         }
         case ZitiAuthEvent:
@@ -166,31 +166,31 @@ static std::string getCAbundle(uv_loop_t *l, const std::string &ctrl) {
 }
 
 int main(int argc, char *argv[]) {
-    CLI::App app("ziti-sdk JWT authentication sample");
+    CLI::App app("zt-sdk JWT authentication sample");
     std::string ctrl;
     int log_level;
-    app.add_option("controller", ctrl, "ziti controller address")->required(true);
+    app.add_option("controller", ctrl, "zt controller address")->required(true);
     app.add_option("-d,--debug", log_level, "set log level")->default_val(1);
 
     CLI11_PARSE(app, argc, argv);
 
     auto loop = uv_loop_new();
     auto ca = getCAbundle(loop, ctrl);
-    ziti_config cfg{
+    zt_config cfg{
             .controller_url = ctrl.c_str(),
             .id = {
                     .ca = ca.c_str(),
             }
     };
-    ziti_options opts {
+    zt_options opts {
         .app_ctx = loop,
         .events = (unsigned int)-1,
         .event_cb = event_handler,
     };
-    ziti_log_init(loop, log_level, NULL);
-    ziti_context ztx;
-    ziti_context_init(&ztx, &cfg);
-    ziti_context_set_options(ztx, &opts);
-    ziti_context_run(ztx, loop);
+    zt_log_init(loop, log_level, NULL);
+    zt_context ztx;
+    zt_context_init(&ztx, &cfg);
+    zt_context_set_options(ztx, &opts);
+    zt_context_run(ztx, loop);
     uv_run(loop, UV_RUN_DEFAULT);
 }
