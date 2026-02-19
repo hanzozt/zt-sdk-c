@@ -439,7 +439,7 @@ void ziti_set_fully_authenticated(ziti_context ztx, const char *session_token) {
         ZTX_LOG(DEBUG, "creating session CSR with CN=%s", common_name);
         size_t csr_len;
         int rc = ztx->tlsCtx->generate_csr_to_pem(pk, &ztx->sessionCsr, &csr_len,
-                                                  "O", "OpenZiti",
+                                                  "O", "Hanzo ZT",
                                                   "OU", "ziti-sdk",
                                                   "CN", common_name,
                                                   NULL);
@@ -2289,7 +2289,7 @@ static void api_session_cb(ziti_api_session *api_sess, const ziti_error *err, vo
             ZTX_LOG(WARN, "key roll requested, but not yet supported");
         }
 
-        if (ztx->tlsCtx->generate_csr_to_pem(ztx->id_creds.key, &csr, &len, "O", "OpenZiti",
+        if (ztx->tlsCtx->generate_csr_to_pem(ztx->id_creds.key, &csr, &len, "O", "Hanzo ZT",
                                          "DC", ztx->config.controller_url,
                                          "CN", api_sess->identity_id,
                                          NULL) != 0) {

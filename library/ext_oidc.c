@@ -101,7 +101,7 @@ static const char HTTP_SUCCESS_BODY[] =
         "<!DOCTYPE html>\n"
         "<html lang=\"en\">\n"
         "<head>\n"
-        "    <title>OpenZiti: Successful Authentication with External Provider.</title>\n"
+        "    <title>Hanzo ZT: Successful Authentication with External Provider.</title>\n"
         "    <script>\n"
         "        function closeWindow() {\n"
         "            setTimeout(function() {\n"
@@ -112,7 +112,7 @@ static const char HTTP_SUCCESS_BODY[] =
         "</head>\n"
         "<script type=\"text/javascript\">closeWindow()</script>"
         "<body onload=\"closeWindow()\">\n"
-        "    <img height=\"40px\" src=\"https://netfoundry.io/docs/img/openziti-logo-light.svg\"/>"
+        "    <img height=\"40px\" src=\"https://netfoundry.io/docs/img/hanzozt-logo-light.svg\"/>"
         "    <h2>Successfully authenticated with external provider.</h2><p>You may close this page. It will attempt to close itself in 3 seconds.</p>\n"
         "</body>\n"
         "</html>\n";
@@ -646,7 +646,7 @@ int ext_oidc_client_start(ext_oidc_client_t *clt, ext_oidc_token_cb cb) {
             {"code_challenge_method", "S256"},
             {"state",                 req->state},
             {"audience",              clt->signer_cfg.audience ?
-                                      clt->signer_cfg.audience : "openziti"},
+                                      clt->signer_cfg.audience : "hanzozt"},
     };
 
     ext_start_auth(req, auth_url, sizeof(query)/sizeof(query[0]), query);

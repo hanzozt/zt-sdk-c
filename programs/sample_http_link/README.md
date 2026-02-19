@@ -1,16 +1,16 @@
 # Sample HTTP Link
 
-## OpenZiti Concepts Demonstrated
-This sample demonstrates some key OpenZiti concepts:
+## Hanzo ZT Concepts Demonstrated
+This sample demonstrates some key Hanzo ZT concepts:
 * Application-embedded zero trust client.
-* Offloading traffic from an identity. OpenZiti allows you to configure a tunneler to offload traffic towards another. This sample offloads traffic from a router to http://httpbin.org using a `host.v1` config.
+* Offloading traffic from an identity. Hanzo ZT allows you to configure a tunneler to offload traffic towards another. This sample offloads traffic from a router to http://httpbin.org using a `host.v1` config.
 * Using a `host.v1` config to specify an address and port to dial in order to reach the service
 * Creating a service and adding a single (host) config to configure the service.
 * Service Policies to authorize identities to perform `dial` or `bind`.
 
 ## Prerequisites
 * You'll want to follow the steps in [BUILD.md](../../BUILD.md) to compile the sample programs.
-* You will need an OpenZiti network, if you don't have one, try one of the [quickstarts](https://openziti.io/docs/learn/quickstarts/). 
+* You will need an Hanzo ZT network, if you don't have one, try one of the [quickstarts](https://hanzozt.dev/docs/learn/quickstarts/). 
 
 ## Setup
 ### Create Identities
@@ -24,7 +24,7 @@ ziti edge create identity device httpbin.server -a httpbinServerEndpoints -o htt
 ziti edge create identity device httpbin.client -a httpbinClientEndpoints -o httpbin.client.jwt
 ```
 ### Enroll the Identities
-The identities need to be [enrolled](https://openziti.io/docs/learn/core-concepts/identities/enrolling) so the 
+The identities need to be [enrolled](https://hanzozt.dev/docs/learn/core-concepts/identities/enrolling) so the 
 controller knows about them.
 ```
 ziti edge enroll httpbin.server.jwt
@@ -53,10 +53,10 @@ ziti edge create service-policy httpbin-dialing Dial --service-roles '@httpbin' 
 ```
 
 ### Start a Tunneler
-Download the appropriate Ziti Tunneler for your operating system [here](https://github.com/openziti/ziti-tunnel-sdk-c/releases/latest).
+Download the appropriate Ziti Tunneler for your operating system [here](https://github.com/hanzozt/ziti-tunnel-sdk-c/releases/latest).
 
 Start the tunneler, providing it with the server identity file (`httpbin.server.json`). Be sure to update the path to 
-point to your identity file as necessary. The tunneler will handle offloading traffic from the OpenZiti network to its 
+point to your identity file as necessary. The tunneler will handle offloading traffic from the Hanzo ZT network to its 
 final destination (http://httpbin.org).
 ```
 sudo ./ziti-edge-tunnel run -i httpbin.server.json

@@ -267,7 +267,7 @@ typedef struct ziti_options_s {
     /**
      * \brief this setting allows SDK to auto-extend identity certificate.
      *
-     * This only applies if certificate was issued by the OpenZiti network.
+     * This only applies if certificate was issued by the Hanzo ZT network.
      * The application must handle [ZitiConfigEvent] to capture and save
      * the newly issued certificate.
      * SDK will extend certificate when expiration date falls

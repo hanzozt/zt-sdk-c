@@ -46,7 +46,7 @@
 #define TOKEN_EP "token_endpoint"
 #define OIDC_CONFIG ".well-known/openid-configuration"
 
-#define INTERNAL_CLIENT_ID  "openziti"
+#define INTERNAL_CLIENT_ID  "hanzozt"
 #define INTERNAL_TOKEN_TYPE "access_token"
 #define INTERNAL_SCOPES     "openid offline_access"
 
@@ -421,7 +421,7 @@ int oidc_client_start(oidc_client_t *clt, oidc_token_cb cb) {
             {"code_challenge",        req->code_challenge},
             {"code_challenge_method", "S256"},
             {"state",                 req->state},
-            {"audience",              "openziti"},
+            {"audience",              "hanzozt"},
     };
 
     int rc = tlsuv_http_set_url(&clt->http, auth_url);

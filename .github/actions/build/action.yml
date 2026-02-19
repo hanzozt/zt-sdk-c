@@ -50,7 +50,7 @@ runs:
         echo "CI_CACHE=${CI_CACHE}" >> $GITHUB_ENV
         echo "VCPKG_BINARY_SOURCES=${VCPKG_BINARY_SOURCES}" >> $GITHUB_ENV
 
-    - uses: openziti/ziti/setup-cli@main
+    - uses: hanzozt/ziti/setup-cli@main
 
     - uses: lukka/get-cmake@v3.30.1
 

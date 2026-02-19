@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Ziti Mattermost Action - Py
     steps:
-    - uses: openziti/ziti-mattermost-action-py@v1
+    - uses: hanzozt/ziti-mattermost-action-py@v1
       if: github.event_name != 'pull_request_review'
       with:
         zitiId: ${{ secrets.ZITI_MATTERMOST_IDENTITY }}
@@ -29,7 +29,7 @@ jobs:
         eventJson: ${{ toJson(github.event) }}
         senderUsername: "GitHubZ"
 
-    - uses: openziti/ziti-mattermost-action-py@v1
+    - uses: hanzozt/ziti-mattermost-action-py@v1
       if: github.event_name == 'pull_request_review' && github.event.review.state == 'approved'
       with:
         zitiId: ${{ secrets.ZITI_MATTERMOST_IDENTITY }}

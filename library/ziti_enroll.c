@@ -340,7 +340,7 @@ static void enroll_ott(struct ziti_enroll_req *er) {
 
     char *csr = NULL;
     if (er->tls->generate_csr_to_pem(er->pk, &csr, &len,
-                                     "O", "OpenZiti",
+                                     "O", "Hanzo ZT",
                                      "DC", er->enrollment.controller,
                                      "CN", er->enrollment.subject,
                                      NULL) != 0) {

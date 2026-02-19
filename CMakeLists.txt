@@ -4,8 +4,8 @@ include(cmake/version.cmake)
 get_version(${CMAKE_CURRENT_LIST_DIR}/version.txt GIT_VERSION GIT_BRANCH GIT_COMMIT_HASH)
 
 project(ziti-sdk
-        DESCRIPTION "OpenZiti C SDK"
-        HOMEPAGE_URL "https://github.com/openziti/ziti-sdk-c"
+        DESCRIPTION "Hanzo ZT C SDK"
+        HOMEPAGE_URL "https://github.com/hanzozt/ziti-sdk-c"
         LANGUAGES C CXX
 )
 
@@ -71,7 +71,7 @@ if (WIN32)
         set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/cmake_install/ziti-sdk-${PROJECT_VERSION})
     endif()
 else()
-    set(CMAKE_INSTALL_PREFIX /opt/openziti/ziti-sdk-${PROJECT_VERSION})
+    set(CMAKE_INSTALL_PREFIX /opt/hanzozt/ziti-sdk-${PROJECT_VERSION})
 endif()
 
 message("cross-compiling ${CMAKE_CROSSCOMPILING}")

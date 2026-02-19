@@ -8,7 +8,7 @@ if (NOT TARGET tlsuv)
                 ${CMAKE_CURRENT_BINARY_DIR}/tlsuv)
     else ()
         FetchContent_Declare(tlsuv
-                GIT_REPOSITORY https://github.com/openziti/tlsuv.git
+                GIT_REPOSITORY https://github.com/hanzozt/tlsuv.git
                 GIT_TAG ${tlsuv_VERSION}
         )
         FetchContent_MakeAvailable(tlsuv)

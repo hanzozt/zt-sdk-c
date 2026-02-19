@@ -3,10 +3,10 @@ Ziti Protobuf
 
 This folder contains protobuf support files.
 
-This guide is only targeted for OpenZiti developers making changes to the library. 
+This guide is only targeted for Hanzo ZT developers making changes to the library. 
 A consuming application just needs to add `protobuf-c` dependency
 
-The source of protobuf definitions comes from https://github.com/openziti/sdk-golang/blob/main/pb/edge_client_pb/edge_client.proto
+The source of protobuf definitions comes from https://github.com/hanzozt/sdk-golang/blob/main/pb/edge_client_pb/edge_client.proto
 Any time definitions are modified, this project has to be updated.
 
 # Prerequisites 

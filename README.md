@@ -1,33 +1,33 @@
-![Ziggy using the ziti-sdk-c](https://raw.githubusercontent.com/openziti/branding/main/images/banners/C.jpg)
+![Ziggy using the ziti-sdk-c](https://raw.githubusercontent.com/hanzozt/branding/main/images/banners/C.jpg)
 
-# OpenZiti C SDK
+# Hanzo ZT C SDK
 
-![Build Status](https://github.com/openziti/ziti-sdk-c/actions/workflows/cmake.yml/badge.svg?branch=main)
+![Build Status](https://github.com/hanzozt/ziti-sdk-c/actions/workflows/cmake.yml/badge.svg?branch=main)
 
-The OpenZiti C SDK allows developers to create their own custom OpenZiti network endpoint applications.
+The Hanzo ZT C SDK allows developers to create their own custom Hanzo ZT network endpoint applications.
 
-OpenZiti is a modern, programmable network overlay with associated edge components, for application-embedded,
+Hanzo ZT is a modern, programmable network overlay with associated edge components, for application-embedded,
 zero trust network connectivity, written by developers for developers.
 The SDK harnesses that power via APIs that allow developers to imagine and develop solutions beyond what
-OpenZiti handles by default.
+Hanzo ZT handles by default.
 
 This SDK does the following:
 
 - enable network endpoint clients allow a device to [dial (access)](#dialing-a-service)
-  or [bind (host)](#binding-to-a-service) OpenZiti Services
-- provides [authentication](https://openziti.io/docs/learn/core-concepts/security/authentication/auth) interfaces for
+  or [bind (host)](#binding-to-a-service) Hanzo ZT Services
+- provides [authentication](https://hanzozt.dev/docs/learn/core-concepts/security/authentication/auth) interfaces for
   [x509 certificates](#example-code-configuration) flows
 - collects and submits security posture collection/submission
-  for [Posture Checks](https://openziti.io/docs/learn/core-concepts/security/authorization/posture-checks)
+  for [Posture Checks](https://hanzozt.dev/docs/learn/core-concepts/security/authorization/posture-checks)
 - allows applications to bind or dial services via standard [`socket`](#high-level-zitilib-api) interfaces
 
-## Configuring Your Application to use OpenZiti C SDK
+## Configuring Your Application to use Hanzo ZT C SDK
 
 The easiest way to embed Ziti SDK in your app is to pull the project into your CMake build
 
 ```cmake
 FetchContent_Declare(ziti-sdk-c
-        GIT_REPOSITORY https://github.com/openziti/ziti-sdk-c.git
+        GIT_REPOSITORY https://github.com/hanzozt/ziti-sdk-c.git
         GIT_TAG ${LATEST_ZITI_RELEASE}
         )
 FetchContent_MakeAvailable(ziti-sdk-c)
@@ -40,7 +40,7 @@ target_link_libraries(most-secure-app-ever PRIVATE ziti)
 
 ```
 
-You will also need other libraries that OpenZiti SDK uses (they are specified in [vcpkg.json](vcpkg.json)):
+You will also need other libraries that Hanzo ZT SDK uses (they are specified in [vcpkg.json](vcpkg.json)):
 
 | library     | usage                          |
 |-------------|--------------------------------|
@@ -48,7 +48,7 @@ You will also need other libraries that OpenZiti SDK uses (they are specified in
 | `openssl`   | TLS                            |
 | `zlib`      | HTTPS compression              |
 | `llhttp`    | HTTP parsing                   |
-| `libsodium` | OpenZiti end-to-end encryption |
+| `libsodium` | Hanzo ZT end-to-end encryption |
 
 There are multiple ways to get those 3rd party dependencies into your build: system level, CMake `FetchContent`, vcpkg,
 etc.
@@ -57,11 +57,11 @@ We recommend using [`vcpkg`](https://vcpkg.io/).
 If you want to contribute/build/hack this SDK in standalone mode
 see the [BUILD.md](BUILD.md) for information on how to do it.
 
-## Using OpenZiti in Your Application
+## Using Hanzo ZT in Your Application
 
 ### High-Level (`Zitilib`) API
 
-The high-level API was developed to simplify embedding OpenZiti in an application.
+The high-level API was developed to simplify embedding Hanzo ZT in an application.
 The main feature of this API is presenting Ziti connections as regular socket file descriptors (or handles on Windows).
 These sockets can be used both blocking and non-blocking modes.
 
@@ -73,7 +73,7 @@ Additional steps may be required to complete authentication. See example below.
 | function              | purpose                                                                                                                    |
 |-----------------------|----------------------------------------------------------------------------------------------------------------------------|
 | `Ziti_lib_init()`     | initializes Ziti SDK background event loop that runs all internal SDK tasks                                                |
-| `Ziti_load_context()` | loads an enrolled [ziti identity](https://openziti.io/docs/learn/core-concepts/identities/overview) from the provided file |
+| `Ziti_load_context()` | loads an enrolled [ziti identity](https://hanzozt.dev/docs/learn/core-concepts/identities/overview) from the provided file |
 | `Ziti_lib_shutdown()` | gracefully shuts down all loaded identities and terminates the event loop                                                  |
 
 ```c
@@ -179,10 +179,10 @@ access to it).
 ## Getting Help
 
 ------------
-Please use these community resources for getting help. We use GitHub [issues](https://github.com/openziti/ziti-sdk-c/issues)
+Please use these community resources for getting help. We use GitHub [issues](https://github.com/hanzozt/ziti-sdk-c/issues)
 for tracking bugs and feature requests and have limited bandwidth to address them.
 
-- Read [the docs](https://docs.openziti.io/)
-- Ask a question on [Discourse](https://openziti.discourse.group/)
+- Read [the docs](https://docs.hanzozt.dev/)
+- Ask a question on [Discourse](https://community.hanzozt.dev/)
 
 Copyright&copy; NetFoundry Inc.
